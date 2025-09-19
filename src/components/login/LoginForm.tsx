@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,12 +13,16 @@ import { PaintRoller } from 'lucide-react';
 export function LoginForm() {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🦑');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const context = useContext(GameContext);
+  const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim() && context) {
+      setIsSubmitting(true);
       context.login(name.trim(), emoji);
+      router.push('/setup');
     }
   };
 
@@ -49,7 +54,11 @@ export function LoginForm() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full h-14 text-xl font-bold transform hover:scale-105 transition-transform" disabled={!name.trim()}>
+          <Button
+            type="submit"
+            className="w-full h-14 text-xl font-bold transform hover:scale-105 transition-transform"
+            disabled={!name.trim() || isSubmitting}
+          >
             Entrar na Batalha!
           </Button>
         </CardFooter>

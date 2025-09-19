@@ -56,7 +56,7 @@ interface GameContextType {
   player: Player | null;
   game: Game | null;
   loading: boolean;
-  login: (name: string, emoji: string) => void;
+  login: (name: string, emoji: string) => Player;
   logout: () => void;
   joinTeam: (teamId: TeamId) => Promise<void>;
   selectColor: (teamId: TeamId, color: string) => Promise<void>;
@@ -131,6 +131,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const newPlayer: Player = { id: uuidv4(), name, emoji };
     setPlayer(newPlayer);
     toast({ title: `Bem-vindo, ${name}!`, description: 'Prepare-se para a batalha!' });
+    return newPlayer;
   };
 
   const logout = () => {
