@@ -10,8 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['"Fredoka One"', 'sans-serif'],
-        headline: ['"Fredoka One"', 'sans-serif'],
+        sans: ['"Fredoka One"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

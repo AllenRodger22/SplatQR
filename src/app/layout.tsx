@@ -21,7 +21,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet" />
       </head>
-      <body className={cn('font-headline antialiased')}>
+      <body className={cn(
+          "antialiased font-sans",
+        )}>
         <GameProvider>
           <main>{children}</main>
           <Toaster />

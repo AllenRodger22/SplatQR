@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Home, Printer, QrCode } from 'lucide-react';
@@ -80,7 +80,7 @@ export default function QRCodesPage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center text-center gap-4">
                  <div className="bg-white p-4 rounded-lg">
-                    <QRCode value={loginUrl} size={256} />
+                    <QRCodeSVG value={loginUrl} size={256} />
                  </div>
                  <p className="font-mono text-sm break-all">{loginUrl}</p>
             </CardContent>
@@ -96,7 +96,7 @@ export default function QRCodesPage() {
                     <div key={zone.id} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card">
                         <h3 className="font-bold text-xl">Zona {zone.id.split('-')[1].toUpperCase()}</h3>
                         <div className="bg-white p-2 rounded-md">
-                            <QRCode value={zone.url} size={128} />
+                            <QRCodeSVG value={zone.url} size={128} />
                         </div>
                         <p className="font-mono text-xs break-all">{zone.url}</p>
                     </div>
