@@ -1,18 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Gamepad2, ArrowRight } from 'lucide-react';
+import { Gamepad2, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { GameContext } from '@/context/GameContext';
+import { LoginForm } from '@/components/login/LoginForm';
+import ClientOnly from '@/components/client-only';
 
-export default function HomePage() {
+function HomePageContent() {
   const router = useRouter();
   const [gameId, setGameId] = useState('');
   const { toast } = useToast();
@@ -63,56 +66,86 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
-      <header className="mb-10 text-center">
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-          SplatQR
-        </h1>
-        <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>
-      </header>
+    <div className="w-full max-w-md space-y-8">
+      <Card className="animate-bounce-in border-primary/50 shadow-lg shadow-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-3xl">
+            <Gamepad2 className="h-8 w-8" />
+            Criar Sala
+          </CardTitle>
+          <CardDescription>Crie uma nova sala e convide seus amigos para a batalha.</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button onClick={handleCreateGame} className="w-full h-14 text-xl" disabled={isCreating || isJoining}>
+            {isCreating ? 'Criando...' : 'Criar Nova Sala'}
+          </Button>
+        </CardFooter>
+      </Card>
 
-      <div className="w-full max-w-md space-y-8">
-        <Card className="animate-bounce-in border-primary/50 shadow-lg shadow-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3 text-3xl">
-              <Gamepad2 className="h-8 w-8" />
-              Criar Sala
-            </CardTitle>
-            <CardDescription>Crie uma nova sala e convide seus amigos para a batalha.</CardDescription>
-          </CardHeader>
+      <Card className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
+        <CardHeader>
+          <CardTitle className="text-3xl">Entrar na Sala</CardTitle>
+          <CardDescription>Já tem um código? Insira abaixo para entrar no jogo.</CardDescription>
+        </CardHeader>
+        <form onSubmit={handleJoinGame}>
+          <CardContent className="space-y-4">
+            <Label htmlFor="gameId" className="sr-only">Código da Sala</Label>
+            <Input
+              id="gameId"
+              placeholder="Insira o código da sala"
+              value={gameId}
+              onChange={(e) => setGameId(e.target.value.toLowerCase())}
+              className="h-12 text-center text-lg tracking-widest"
+              disabled={isJoining || isCreating}
+            />
+          </CardContent>
           <CardFooter>
-            <Button onClick={handleCreateGame} className="w-full h-14 text-xl" disabled={isCreating || isJoining}>
-              {isCreating ? 'Criando...' : 'Criar Sala'}
+            <Button type="submit" variant="outline" className="w-full h-14 text-xl" disabled={isJoining || isCreating}>
+              {isJoining ? 'Entrando...' : 'Entrar na Sala'}
+              <ArrowRight className="ml-2 h-6 w-6" />
             </Button>
           </CardFooter>
-        </Card>
-
-        <Card className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
-          <CardHeader>
-            <CardTitle className="text-3xl">Entrar na Sala</CardTitle>
-            <CardDescription>Já tem um código? Insira abaixo para entrar no jogo.</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleJoinGame}>
-            <CardContent className="space-y-4">
-              <Label htmlFor="gameId" className="sr-only">Código da Sala</Label>
-              <Input
-                id="gameId"
-                placeholder="Insira o código da sala"
-                value={gameId}
-                onChange={(e) => setGameId(e.target.value.toLowerCase())}
-                className="h-12 text-center text-lg tracking-widest"
-                disabled={isJoining || isCreating}
-              />
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" variant="outline" className="w-full h-14 text-xl" disabled={isJoining || isCreating}>
-                {isJoining ? 'Entrando...' : 'Entrar na Sala'}
-                <ArrowRight className="ml-2 h-6 w-6" />
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
+        </form>
+      </Card>
     </div>
+  );
+}
+
+export default function HomePage() {
+  const context = useContext(GameContext);
+  const { player, loading, login } = context || {};
+  const [playerCreated, setPlayerCreated] = useState(!!player);
+
+  const handleLogin = (name: string, emoji: string) => {
+    if (login) {
+      login(name, emoji);
+      setPlayerCreated(true);
+    }
+  };
+  
+  return (
+    <ClientOnly>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
+        <header className="mb-10 text-center">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            SplatQR
+          </h1>
+          <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>
+        </header>
+
+        {loading ? (
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p>Carregando...</p>
+          </div>
+        ) : playerCreated ? (
+          <HomePageContent />
+        ) : (
+          <div className="w-full max-w-md">
+            <LoginForm onLogin={handleLogin} />
+          </div>
+        )}
+      </div>
+    </ClientOnly>
   );
 }
