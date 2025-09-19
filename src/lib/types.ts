@@ -1,5 +1,18 @@
 import type { Timestamp } from 'firebase/firestore';
 
+export interface CaptureStats {
+  totalCaptures: Record<TeamId, number>;
+  recaptures: Record<TeamId, number>;
+}
+
+export interface CaptureEvent {
+  zoneId: string;
+  teamId: TeamId;
+  playerId: string;
+  timestamp: Timestamp;
+  isRecapture: boolean;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -35,4 +48,5 @@ export interface Game {
   };
   winner: TeamId | 'draw' | null;
   readyPlayers: string[]; // player ids
+  captureStats: CaptureStats;
 }

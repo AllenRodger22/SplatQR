@@ -87,9 +87,9 @@ export default function GamePage() {
         </main>
         
         <footer className="text-center mt-6">
-            <Link href="/qrcodesadmin" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
+            <Link href="/QRCODESADM22" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
                 <Settings className="h-4 w-4" />
-                Admin / QR Codes
+                Painel de QR Codes
             </Link>
         </footer>
       </div>

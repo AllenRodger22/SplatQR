@@ -17,6 +17,9 @@ export function TeamPanel({ teamId, score }: TeamPanelProps) {
   if (!context || !context.game) return null;
 
   const team = context.game.teams[teamId];
+  const captureStats = context.game.captureStats;
+  const totalCaptures = captureStats?.totalCaptures?.[teamId] ?? 0;
+  const recaptures = captureStats?.recaptures?.[teamId] ?? 0;
 
   return (
     <Card className="h-full flex flex-col" style={{'--team-color': team.color} as React.CSSProperties}>
@@ -45,6 +48,17 @@ export function TeamPanel({ teamId, score }: TeamPanelProps) {
                 <span className="font-medium text-lg">{p.name}</span>
               </div>
             ))}
+          </div>
+          <div className="mt-4 rounded-xl border border-border/40 bg-background/60 p-3 text-center shadow-inner backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Estatísticas</p>
+            <div className="mt-2 flex flex-col gap-1 text-sm font-semibold text-muted-foreground">
+              <span>
+                Capturas: <span className="text-foreground">{totalCaptures}</span>
+              </span>
+              <span>
+                Recapturas: <span className="text-foreground">{recaptures}</span>
+              </span>
+            </div>
           </div>
       </CardContent>
     </Card>

@@ -13,12 +13,12 @@ export default function RedirectPage() {
       return; // Aguarda o carregamento do contexto
     }
 
-    if (!context.player) {
+    if (!context?.player) {
       router.replace('/manual-login');
       return;
     }
 
-    if (context.game) {
+    if (context?.game) {
       if (context.game.status === 'playing' || context.game.status === 'finished') {
         router.replace('/game');
       } else { // 'setup'

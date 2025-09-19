@@ -2,23 +2,45 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
-import type { Game, Player, TeamId } from '@/lib/types';
+import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs, addDoc } from 'firebase/firestore';
+import type { Game, Player, TeamId, CaptureStats } from '@/lib/types';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
+import { ZONE_DEFINITIONS } from '@/lib/zones';
 
 const GAME_ID = 'splattag-main';
-const NUM_ZONES = 11;
+const createDefaultCaptureStats = (): CaptureStats => ({
+  totalCaptures: { splatSquad: 0, inkMasters: 0 },
+  recaptures: { splatSquad: 0, inkMasters: 0 },
+});
 
-const defaultGame: Game = {
+const normalizeCaptureStats = (stats?: CaptureStats): CaptureStats => {
+  const defaults = createDefaultCaptureStats();
+  if (!stats) {
+    return defaults;
+  }
+
+  return {
+    totalCaptures: {
+      splatSquad: stats.totalCaptures?.splatSquad ?? defaults.totalCaptures.splatSquad,
+      inkMasters: stats.totalCaptures?.inkMasters ?? defaults.totalCaptures.inkMasters,
+    },
+    recaptures: {
+      splatSquad: stats.recaptures?.splatSquad ?? defaults.recaptures.splatSquad,
+      inkMasters: stats.recaptures?.inkMasters ?? defaults.recaptures.inkMasters,
+    },
+  };
+};
+
+const createDefaultGame = (): Game => ({
   status: 'setup',
   teams: {
     splatSquad: { name: 'Time A', color: '#FF00FF', players: [] },
     inkMasters: { name: 'Time B', color: '#00FFFF', players: [] },
   },
-  zones: Array.from({ length: NUM_ZONES }, (_, i) => ({
-    id: `zone-${String.fromCharCode(97 + i)}`,
+  zones: ZONE_DEFINITIONS.map(({ id }) => ({
+    id,
     capturedBy: null,
     capturedAt: null,
   })),
@@ -27,7 +49,8 @@ const defaultGame: Game = {
   votes: { 15: [], 30: [] },
   winner: null,
   readyPlayers: [],
-};
+  captureStats: createDefaultCaptureStats(),
+});
 
 interface GameContextType {
   player: Player | null;
@@ -55,7 +78,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   const resetGame = useCallback(async () => {
     try {
-      await setDoc(gameDocRef, defaultGame);
+      const captureEventsRef = collection(db, 'games', GAME_ID, 'captureEvents');
+      const captureEvents = await getDocs(captureEventsRef);
+
+      if (!captureEvents.empty) {
+        const deletionBatch = writeBatch(db);
+        captureEvents.forEach((eventDoc) => {
+          deletionBatch.delete(eventDoc.ref);
+        });
+        await deletionBatch.commit();
+      }
+
+      await setDoc(gameDocRef, createDefaultGame());
       toast({ title: 'Jogo Reiniciado!', description: 'Pronto para uma nova partida.' });
     } catch (error) {
       console.error('Error resetting game:', error);
@@ -66,10 +100,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onSnapshot(gameDocRef, (doc) => {
       if (doc.exists()) {
-        const gameData = doc.data() as Game;
+        const rawData = doc.data();
+        const gameData = rawData as Game;
         // Ensure readyPlayers array exists
         if (!gameData.readyPlayers) {
           gameData.readyPlayers = [];
+        }
+        const captureStats = normalizeCaptureStats(gameData.captureStats);
+        gameData.captureStats = captureStats;
+        if (!('captureStats' in rawData) || !rawData.captureStats) {
+          updateDoc(gameDocRef, { captureStats }).catch((error) =>
+            console.error('Error updating capture stats metadata:', error)
+          );
         }
         setGame(gameData);
       } else {
@@ -253,30 +295,65 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    // Allow recapturing
-    // if (zone.capturedBy === playerTeamId) {
-    //   toast({ title: 'Zona já é sua!', description: `Sua equipe já capturou a zona ${zoneId.split('-')[1].toUpperCase()}.` });
-    //   return;
-    // }
+    const previousOwner = zone.capturedBy;
+    const isRepeatCapture = previousOwner === playerTeamId;
+    const isRecapture = previousOwner !== null && previousOwner !== playerTeamId;
 
-    const updatedZones = game.zones.map(z => 
-      z.id === zoneId 
-      ? { ...z, capturedBy: playerTeamId, capturedAt: Timestamp.now() } 
-      : z
+    const updatedZones = game.zones.map(z =>
+      z.id === zoneId
+        ? { ...z, capturedBy: playerTeamId, capturedAt: Timestamp.now() }
+        : z
     );
 
+    const currentStats = normalizeCaptureStats(game.captureStats);
+    const updatedStats: CaptureStats = {
+      totalCaptures: { ...currentStats.totalCaptures },
+      recaptures: { ...currentStats.recaptures },
+    };
+
+    if (!isRepeatCapture) {
+      updatedStats.totalCaptures[playerTeamId] = (updatedStats.totalCaptures[playerTeamId] ?? 0) + 1;
+      if (isRecapture) {
+        updatedStats.recaptures[playerTeamId] = (updatedStats.recaptures[playerTeamId] ?? 0) + 1;
+      }
+    }
+
     try {
-      await updateDoc(gameDocRef, { zones: updatedZones });
-      toast({ title: 'Zona Capturada!', description: `Você capturou a zona ${zoneId.split('-')[1].toUpperCase()} para sua equipe!` });
-      
-      const allZonesCaptured = updatedZones.every(z => z.capturedBy === playerTeamId);
-      if (allZonesCaptured) {
-        await updateDoc(gameDocRef, {
-            status: 'finished',
-            winner: playerTeamId
+      await updateDoc(gameDocRef, {
+        zones: updatedZones,
+        captureStats: updatedStats,
+      });
+
+      if (!isRepeatCapture) {
+        await addDoc(collection(db, 'games', GAME_ID, 'captureEvents'), {
+          zoneId,
+          teamId: playerTeamId,
+          playerId: player.id,
+          timestamp: serverTimestamp(),
+          isRecapture,
         });
       }
 
+      const zoneLabel = zoneId.split('-')[1].toUpperCase();
+      if (isRepeatCapture) {
+        toast({
+          title: 'Zona Protegida!',
+          description: `Sua equipe já controla a zona ${zoneLabel}. Continuem firmes!`,
+        });
+      } else {
+        toast({
+          title: isRecapture ? 'Zona Reconquistada!' : 'Zona Capturada!',
+          description: `${isRecapture ? 'Você retomou' : 'Você capturou'} a zona ${zoneLabel} para sua equipe!`,
+        });
+      }
+
+      const allZonesCaptured = updatedZones.every(z => z.capturedBy === playerTeamId);
+      if (allZonesCaptured) {
+        await updateDoc(gameDocRef, {
+          status: 'finished',
+          winner: playerTeamId,
+        });
+      }
     } catch (error) {
       console.error('Error capturing zone:', error);
       toast({ variant: 'destructive', title: 'Captura Falhou', description: 'Não foi possível capturar a zona.' });
