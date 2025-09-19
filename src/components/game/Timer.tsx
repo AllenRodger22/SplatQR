@@ -18,7 +18,10 @@ export function Timer() {
 
   useEffect(() => {
     if (!game || !game.gameStartTime || game.status !== 'playing') {
-      if (game?.status === 'finished') setRemainingTime('00:00');
+      if (game?.status === 'finished') {
+        setRemainingTime('00:00');
+        setIsEnding(false);
+      }
       return;
     }
 
@@ -33,23 +36,33 @@ export function Timer() {
         setRemainingTime('00:00');
         clearInterval(interval);
         
-        const gameDocRef = doc(db, 'games', GAME_ID);
-        const currentDoc = game as Game;
-
-        if (currentDoc.status === 'playing') {
-            const splatSquadScore = currentDoc.zones.filter(z => z.capturedBy === 'splatSquad').length;
-            const inkMastersScore = currentDoc.zones.filter(z => z.capturedBy === 'inkMasters').length;
-            let winner: Game['winner'] = null;
-            if (splatSquadScore > inkMastersScore) winner = 'splatSquad';
-            else if (inkMastersScore > splatSquadScore) winner = 'inkMasters';
-            else winner = 'draw';
-            
-            await updateDoc(gameDocRef, { status: 'finished', winner: winner });
+        // Only one client should update the game status
+        if (game.status === 'playing') {
+            const gameDocRef = doc(db, 'games', GAME_ID);
+            try {
+                const splatSquadScore = game.zones.filter(z => z.capturedBy === 'splatSquad').length;
+                const inkMastersScore = game.zones.filter(z => z.capturedBy === 'inkMasters').length;
+                let winner: Game['winner'] = null;
+                if (splatSquadScore > inkMastersScore) winner = 'splatSquad';
+                else if (inkMastersScore > splatSquadScore) winner = 'inkMasters';
+                else winner = 'draw';
+                
+                // Check status again before writing to prevent race conditions
+                if(game.status === 'playing'){
+                    await updateDoc(gameDocRef, { status: 'finished', winner: winner });
+                }
+            } catch (error) {
+                console.error("Error finishing game:", error);
+            }
         }
         return;
       }
       
-      if (diff <= 10000) setIsEnding(true);
+      if (diff <= 10000 && !isEnding) {
+          setIsEnding(true);
+      } else if (diff > 10000 && isEnding) {
+          setIsEnding(false);
+      }
 
       const minutes = Math.floor(diff / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
@@ -60,7 +73,7 @@ export function Timer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [game]);
+  }, [game, isEnding]);
 
   if (!game || !game.gameStartTime) {
     const duration = game?.gameDuration || 15;
