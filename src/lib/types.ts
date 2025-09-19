@@ -34,4 +34,5 @@ export interface Game {
     30: string[]; // player ids
   };
   winner: TeamId | 'draw' | null;
+  readyPlayers: string[]; // player ids
 }

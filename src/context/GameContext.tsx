@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, serverTimestamp, Timestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 import type { Game, Player, TeamId } from '@/lib/types';
 import useLocalStorage from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,7 @@ const defaultGame: Game = {
   gameStartTime: null,
   votes: { 15: [], 30: [] },
   winner: null,
+  readyPlayers: [],
 };
 
 interface GameContextType {
@@ -39,6 +40,7 @@ interface GameContextType {
   voteToStart: (duration: 15 | 30) => Promise<void>;
   captureZone: (zoneId: string) => Promise<void>;
   resetGame: () => Promise<void>;
+  toggleReady: () => Promise<void>;
 }
 
 export const GameContext = createContext<GameContextType | null>(null);
@@ -64,7 +66,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onSnapshot(gameDocRef, (doc) => {
       if (doc.exists()) {
-        setGame(doc.data() as Game);
+        const gameData = doc.data() as Game;
+        // Ensure readyPlayers array exists
+        if (!gameData.readyPlayers) {
+          gameData.readyPlayers = [];
+        }
+        setGame(gameData);
       } else {
         resetGame();
       }
@@ -99,6 +106,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         toast({ title: "Você já está nesta equipe!" });
         return;
     }
+    
+    if (game.readyPlayers.includes(player.id)) {
+      toast({ variant: 'destructive', title: "Você já está pronto!", description: "Não é possível trocar de time."});
+      return;
+    }
 
     const batch = writeBatch(db);
   
@@ -125,7 +137,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const selectColor = async (teamId: TeamId, color: string) => {
-    if (!game) return;
+    if (!game || !player) return;
+
+    if (game.readyPlayers.includes(player.id)) {
+        toast({ variant: 'destructive', title: "Você já está pronto!", description: "Não é possível trocar a cor."});
+        return;
+    }
+
     const otherTeamId = teamId === 'splatSquad' ? 'inkMasters' : 'splatSquad';
     if (game.teams[otherTeamId].color === color) {
       toast({ variant: 'destructive', title: 'Cor já escolhida!', description: 'A outra equipe já escolheu esta cor.' });
@@ -142,10 +160,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const voteToStart = async (duration: 15 | 30) => {
     if (!player || !game || game.status !== 'setup') return;
 
-    const { splatSquad, inkMasters } = game.teams;
-    // Allow starting with at least one player in one team
-    if (splatSquad.players.length < 1 && inkMasters.players.length < 1) {
-      toast({ variant: 'destructive', title: 'Jogadores insuficientes!', description: 'Pelo menos um jogador precisa estar em uma equipe para começar.' });
+    if (game.readyPlayers.includes(player.id)) {
+      toast({ variant: 'destructive', title: "Você já está pronto!", description: "Não é possível votar agora."});
       return;
     }
     
@@ -157,26 +173,63 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         return;
     }
 
-    const firstVote = game.votes[15].length === 0 && game.votes[30].length === 0;
-
     const updates: any = {
       [`votes.${duration}`]: arrayUnion(player.id)
     };
 
-    if (firstVote) {
-      updates.status = 'playing';
-      updates.gameStartTime = serverTimestamp();
-      updates.gameDuration = duration;
-      toast({ title: 'Jogo Começou!', description: `A partida começou e durará ${duration} minutos!` });
-    } else {
-        toast({title: 'Voto Computado!', description: `Você votou por um jogo de ${duration} minutos.`});
-    }
+    toast({title: 'Voto Computado!', description: `Você votou por um jogo de ${duration} minutos.`});
 
     try {
       await updateDoc(gameDocRef, updates);
     } catch (error) {
       console.error("Error voting to start: ", error);
-      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível iniciar o jogo.' });
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível registrar seu voto.' });
+    }
+  };
+
+  const toggleReady = async () => {
+    if (!player || !game) return;
+
+    const isReady = game.readyPlayers.includes(player.id);
+
+    const updates: any = {};
+    if (isReady) {
+      updates.readyPlayers = arrayRemove(player.id);
+      toast({ title: 'Você não está mais pronto.' });
+    } else {
+      const isInATeam = game.teams.splatSquad.players.some(p => p.id === player.id) || game.teams.inkMasters.players.some(p => p.id === player.id);
+      if (!isInATeam) {
+        toast({ variant: 'destructive', title: 'Entre em um time!', description: 'Você precisa estar em um time para ficar pronto.' });
+        return;
+      }
+      updates.readyPlayers = arrayUnion(player.id);
+      toast({ title: 'Você está pronto!' });
+    }
+
+    // Check if all players are ready to start the game
+    const allPlayersInTeams = [...game.teams.splatSquad.players, ...game.teams.inkMasters.players];
+    const newReadyPlayers = isReady 
+      ? game.readyPlayers.filter(id => id !== player.id) 
+      : [...game.readyPlayers, player.id];
+
+    const allPlayersReady = allPlayersInTeams.length > 0 && allPlayersInTeams.every(p => newReadyPlayers.includes(p.id));
+
+    if (allPlayersReady) {
+      const voteCount15 = game.votes[15].length;
+      const voteCount30 = game.votes[30].length;
+      const duration = voteCount30 > voteCount15 ? 30 : 15;
+
+      updates.status = 'playing';
+      updates.gameStartTime = serverTimestamp();
+      updates.gameDuration = duration;
+      toast({ title: 'O Jogo Começou!', description: `Todos estão prontos! A partida durará ${duration} minutos.` });
+    }
+
+    try {
+      await updateDoc(gameDocRef, updates);
+    } catch (error) {
+      console.error("Error toggling ready state:", error);
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível atualizar seu status.' });
     }
   };
   
@@ -199,6 +252,12 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       toast({ variant: 'destructive', title: 'Zona Inválida', description: 'Este QR code não corresponde a uma zona válida.' });
       return;
     }
+
+    // Allow recapturing
+    // if (zone.capturedBy === playerTeamId) {
+    //   toast({ title: 'Zona já é sua!', description: `Sua equipe já capturou a zona ${zoneId.split('-')[1].toUpperCase()}.` });
+    //   return;
+    // }
 
     const updatedZones = game.zones.map(z => 
       z.id === zoneId 
@@ -225,7 +284,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <GameContext.Provider value={{ player, game, loading, login, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame }}>
+    <GameContext.Provider value={{ player, game, loading, login, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
       {children}
     </GameContext.Provider>
   );

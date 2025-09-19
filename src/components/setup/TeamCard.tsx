@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ColorPicker } from './ColorPicker';
-import { Users } from 'lucide-react';
+import { Users, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 
 interface TeamCardProps {
   teamId: TeamId;
@@ -21,6 +23,7 @@ export function TeamCard({ teamId }: TeamCardProps) {
 
   const team = game.teams[teamId];
   const isPlayerOnThisTeam = team.players.some(p => p.id === player.id);
+  const isPlayerReady = game.readyPlayers.includes(player.id);
 
   return (
     <Card className="flex flex-col animate-bounce-in">
@@ -43,11 +46,19 @@ export function TeamCard({ teamId }: TeamCardProps) {
           </h4>
           <div className="space-y-2 min-h-[80px]">
             {team.players.length > 0 ? team.players.map(p => (
-              <div key={p.id} className="flex items-center gap-2 p-2 bg-secondary rounded-md">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="bg-transparent text-xl">{p.emoji}</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">{p.name}</span>
+              <div key={p.id} className={cn("flex items-center justify-between gap-2 p-2 bg-secondary rounded-md", player.id === p.id && "ring-2 ring-primary")}>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-transparent text-xl">{p.emoji}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium">{p.name}</span>
+                </div>
+                 {game.readyPlayers.includes(p.id) && (
+                  <div className="flex items-center gap-1 text-green-400">
+                    <CheckCircle className="h-5 w-5" />
+                    <span className="font-bold text-sm">Pronto</span>
+                  </div>
+                )}
               </div>
             )) : <p className="text-sm text-muted-foreground italic text-center pt-4">Nenhum jogador nesta equipe ainda.</p>}
           </div>
@@ -57,7 +68,7 @@ export function TeamCard({ teamId }: TeamCardProps) {
         <Button
           className="w-full h-12 text-lg transition-transform hover:scale-105"
           onClick={() => joinTeam?.(teamId)}
-          disabled={isPlayerOnThisTeam}
+          disabled={isPlayerOnThisTeam || isPlayerReady}
           style={{
             backgroundColor: isPlayerOnThisTeam ? team.color : undefined,
             color: isPlayerOnThisTeam ? 'black' : undefined,
