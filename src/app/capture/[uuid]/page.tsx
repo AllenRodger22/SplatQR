@@ -22,6 +22,14 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
       router.push('/');
       return;
     }
+
+    if (!loading && player && game) {
+      const isPlayerInTeam = game.teams.splatSquad.players.some(p => p.id === player.id) || game.teams.inkMasters.players.some(p => p.id === player.id);
+      if (!isPlayerInTeam) {
+        router.push('/setup');
+        return;
+      }
+    }
     
     if (!loading && game && game.status !== 'playing') {
       setStatus('failure');
@@ -103,14 +111,6 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
             <CheckCircle className="h-24 w-24 text-green-500" />
             <h1 className="text-3xl font-bold mt-4 text-green-400">Zona Capturada!</h1>
             <p className="text-muted-foreground">Redirecionando de volta para o jogo...</p>
-          </>
-        );
-      case 'already_owned':
-        return (
-          <>
-            <ShieldQuestion className="h-24 w-24 text-blue-500" />
-            <h1 className="text-3xl font-bold mt-4 text-blue-400">Zona Já é Sua!</h1>
-            <p className="text-muted-foreground">Sua equipe já controla esta zona.</p>
           </>
         );
       case 'failure':
