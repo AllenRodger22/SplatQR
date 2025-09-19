@@ -2,11 +2,12 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { db, auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut, User, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs, addDoc, getDoc } from 'firebase/firestore';
 import type { Game, Player, TeamId, CaptureStats } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { ZONE_DEFINITIONS } from '@/lib/zones';
+import { useRouter } from 'next/navigation';
 
 const createDefaultCaptureStats = (): CaptureStats => ({
   totalCaptures: { splatSquad: 0, inkMasters: 0 },
@@ -56,7 +57,9 @@ interface GameContextType {
   game: Game | null;
   loading: boolean;
   gameId: string | null;
-  signInWithGoogle: () => Promise<User | null>;
+  signUpWithEmailAndPassword: (email:string, password: string) => Promise<User | null>;
+  signInWithEmailAndPassword: (email:string, password: string) => Promise<User | null>;
+  createPlayerProfile: (name: string, emoji: string) => Promise<void>;
   logout: () => Promise<void>;
   joinTeam: (teamId: TeamId) => Promise<void>;
   selectColor: (teamId: TeamId, color: string) => Promise<void>;
@@ -76,6 +79,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [gameId, setGameId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
+
 
   useEffect(() => {
     if (!auth) {
@@ -90,13 +95,11 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             if (playerDoc.exists()) {
                 setPlayer({ id: user.uid, ...playerDoc.data() } as Player);
             } else {
-                // Auto-create player on first login
-                const newPlayer = {
-                    name: user.displayName || 'Jogador Anônimo',
-                    emoji: '🦑',
-                };
-                await setDoc(playerDocRef, newPlayer);
-                setPlayer({ id: user.uid, ...newPlayer });
+                setPlayer(null);
+                 // If no player profile, redirect to create one, unless they are already there
+                if(window.location.pathname !== '/manual-login') {
+                    router.push('/manual-login');
+                }
             }
         } else {
             setPlayer(null);
@@ -104,7 +107,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
 
   const resetGame = useCallback(async () => {
@@ -167,20 +170,51 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [gameId, toast]);
 
-  const signInWithGoogle = async (): Promise<User | null> => {
+  const signUpWithEmailAndPassword = async (email: string, password: string): Promise<User | null> => {
     if (!auth) return null;
     setLoading(true);
-    const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      toast({ title: 'Login bem-sucedido!', description: `Bem-vindo, ${result.user.displayName}!` });
-      return result.user;
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        toast({ title: 'Conta criada com sucesso!', description: `Bem-vindo! Agora crie seu perfil.` });
+        return result.user;
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Erro de Login', description: 'Não foi possível fazer login com o Google.' });
-      console.error("Google sign-in error:", error);
-      return null;
+        toast({ variant: 'destructive', title: 'Erro de Cadastro', description: error.message });
+        console.error("Sign up error:", error);
+        return null;
     } finally {
-      setLoading(false);
+        setLoading(false);
+    }
+  };
+
+  const signInWithEmailAndPassword = async (email: string, password: string): Promise<User | null> => {
+    if (!auth) return null;
+    setLoading(true);
+    try {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        toast({ title: 'Login bem-sucedido!', description: `Bem-vindo de volta!` });
+        return result.user;
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Erro de Login', description: error.message });
+        console.error("Sign in error:", error);
+        return null;
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const createPlayerProfile = async (name: string, emoji: string) => {
+    if (!user || !db) return;
+    setLoading(true);
+    try {
+        const playerDocRef = doc(db, 'players', user.uid);
+        const newPlayer = { name, emoji };
+        await setDoc(playerDocRef, newPlayer);
+        setPlayer({ id: user.uid, ...newPlayer });
+        toast({ title: 'Perfil Criado!', description: `Bem-vindo ao SplatQR, ${name}!` });
+    } catch(error: any) {
+        toast({ variant: 'destructive', title: 'Erro ao criar perfil', description: error.message });
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -190,6 +224,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         await signOut(auth);
         setUser(null);
         setPlayer(null);
+        setGameId(null);
+        setGame(null);
+        router.push('/login');
         toast({ title: 'Você saiu.' });
     } catch (error: any) {
         toast({ variant: 'destructive', title: 'Erro ao Sair', description: error.message });
@@ -448,7 +485,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <GameContext.Provider value={{ user, player, game, loading, gameId, setGameId, signInWithGoogle, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
+    <GameContext.Provider value={{ user, player, game, loading, gameId, setGameId, signUpWithEmailAndPassword, signInWithEmailAndPassword, createPlayerProfile, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
       {children}
     </GameContext.Provider>
   );

@@ -20,7 +20,7 @@ function HomePageContent() {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-  const { logout, user, loading } = useContext(GameContext)!;
+  const { logout, user, player, loading } = useContext(GameContext)!;
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -28,7 +28,10 @@ function HomePageContent() {
         const redirectTo = searchParams.get('redirectTo');
         router.replace(redirectTo ? `/login?redirectTo=${redirectTo}` : '/login');
     }
-  }, [user, loading, router, searchParams]);
+     if (!loading && user && !player) {
+      router.replace('/manual-login');
+    }
+  }, [user, player, loading, router, searchParams]);
 
   const handleCreateGame = () => {
     setIsCreating(true);
@@ -77,7 +80,7 @@ function HomePageContent() {
     }
   };
   
-    if (loading || !user) {
+    if (loading || !user || !player) {
       return (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />

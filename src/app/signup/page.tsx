@@ -1,61 +1,48 @@
 'use client';
 
-import { Suspense, useContext, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { GameContext } from '@/context/GameContext';
-import { Loader2, PaintRoller } from 'lucide-react';
+import { Loader2, UserPlus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import ClientOnly from '@/components/client-only';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-function LoginContent() {
+function SignupContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const context = useContext(GameContext);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const redirectTo = searchParams.get('redirectTo');
-
-  useEffect(() => {
-    if (context?.user) {
-      router.replace(redirectTo || '/');
-    }
-  }, [context?.user, router, redirectTo]);
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      context?.toast({ variant: 'destructive', title: 'As senhas não coincidem!' });
+      return;
+    }
     if (context) {
-      const user = await context.signInWithEmailAndPassword(email, password);
+      const user = await context.signUpWithEmailAndPassword(email, password);
       if (user) {
-        router.push(redirectTo || '/');
+        router.push('/manual-login');
       }
     }
   };
 
-  if (context?.loading || context?.user) {
-    return (
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p>Verificando sessão...</p>
-      </div>
-    );
-  }
-
   return (
-    <Card className="w-full max-w-md animate-bounce-in border-primary/50 bg-card/80 shadow-lg shadow-primary/20 backdrop-blur-sm">
+    <Card className="w-full max-w-md animate-bounce-in border-accent/50 bg-card/80 shadow-lg shadow-accent/20 backdrop-blur-sm">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary">
-          <PaintRoller className="h-8 w-8" />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent/20 text-accent">
+          <UserPlus className="h-8 w-8" />
         </div>
-        <CardTitle className="text-4xl">Login - SplatQR</CardTitle>
-        <CardDescription>Use seu e-mail e senha para entrar na batalha!</CardDescription>
+        <CardTitle className="text-4xl">Criar Conta</CardTitle>
+        <CardDescription>Junte-se à batalha de tinta do SplatQR!</CardDescription>
       </CardHeader>
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSignup}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -78,6 +65,19 @@ function LoginContent() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
+              className="h-12 text-lg"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
               className="h-12 text-lg"
             />
           </div>
@@ -86,14 +86,15 @@ function LoginContent() {
           <Button
             type="submit"
             className="h-14 w-full text-xl font-bold transition-transform hover:scale-105"
+            variant="secondary"
             disabled={context?.loading}
           >
-            {context?.loading ? 'Entrando...' : 'Entrar'}
+            {context?.loading ? 'Criando...' : 'Criar Conta'}
           </Button>
           <p className="text-sm text-muted-foreground">
-            Não tem uma conta?{' '}
-            <Link href="/signup" className="font-semibold text-primary underline-offset-4 hover:underline">
-              Cadastre-se
+            Já tem uma conta?{' '}
+            <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Faça login
             </Link>
           </p>
         </CardFooter>
@@ -102,7 +103,7 @@ function LoginContent() {
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <ClientOnly>
       <Suspense
@@ -114,7 +115,7 @@ export default function LoginPage() {
       >
         <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
           <div className="w-full max-w-md">
-            <LoginContent />
+            <SignupContent />
           </div>
         </div>
       </Suspense>
