@@ -49,7 +49,7 @@ export default function GamePage() {
       <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
         <header className="relative text-center mb-4 animate-bounce-in">
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-            SplatTag
+            SplatQR
           </h1>
           <Timer />
         </header>
@@ -81,7 +81,7 @@ export default function GamePage() {
         </main>
         
         <footer className="text-center mt-6">
-            <Link href="/qr-codes" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
+            <Link href="/qrcodesadm" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
                 <Settings className="h-4 w-4" />
                 Admin / QR Codes
             </Link>

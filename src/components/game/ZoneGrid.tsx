@@ -3,7 +3,8 @@
 import { useContext } from 'react';
 import { GameContext } from '@/context/GameContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Flag } from 'lucide-react';
+import { QrCode } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function ZoneGrid() {
   const context = useContext(GameContext);
@@ -18,20 +19,33 @@ export function ZoneGrid() {
         <CardDescription>Escaneie os QR codes para capturar zonas para sua equipe!</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-          {zones.map((zone, index) => {
-            const color = zone.capturedBy ? teams[zone.capturedBy].color : 'hsl(var(--muted))';
+        <div className="grid grid-cols-4 md:grid-cols-6 gap-2">
+          {zones.map((zone) => {
+            const capturedTeam = zone.capturedBy ? teams[zone.capturedBy] : null;
+            const color = capturedTeam?.color;
+            const isCaptured = !!capturedTeam;
+
             return (
               <div
                 key={zone.id}
-                className="flex flex-col items-center justify-center gap-2 aspect-square bg-secondary rounded-lg p-2 transition-all duration-300"
+                className={cn(
+                    "flex flex-col items-center justify-center gap-1 aspect-square rounded-lg p-1 transition-all duration-300 text-white font-bold text-xs shadow-md",
+                    isCaptured ? 'text-black' : 'bg-muted hover:bg-muted/80'
+                )}
                 style={{
-                  boxShadow: zone.capturedBy ? `0 0 15px -2px ${color}` : 'none',
-                  border: zone.capturedBy ? `2px solid ${color}` : '2px solid transparent'
+                  backgroundColor: isCaptured ? color : undefined,
+                  boxShadow: isCaptured ? `0 0 15px -2px ${color}` : 'none',
                 }}
               >
-                <Flag className="w-8 h-8 md:w-10 md:h-10 transition-colors duration-300" style={{ color }} />
-                <span className="font-bold text-sm text-muted-foreground">{zone.id.split('-')[1].toUpperCase()}</span>
+                <QrCode className={cn("w-6 h-6 transition-colors duration-300", isCaptured ? 'text-black/80' : 'text-muted-foreground')} />
+                <span className={cn('text-center leading-tight', isCaptured ? 'text-black/90' : 'text-muted-foreground')}>
+                   {zone.id.split('-')[1].toUpperCase()}
+                </span>
+                 {isCaptured ? (
+                    <span className="text-center text-[10px] leading-tight font-semibold" style={{color: 'black'}}>Capturado</span>
+                ) : (
+                    <span className="text-center text-[10px] leading-tight font-semibold" style={{color: 'hsl(var(--muted-foreground))'}}>Capturar</span>
+                )}
               </div>
             );
           })}

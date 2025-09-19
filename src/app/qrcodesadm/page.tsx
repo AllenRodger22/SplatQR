@@ -9,11 +9,11 @@ import Link from 'next/link';
 
 const NUM_ZONES = 11;
 
-export default function QRCodesPage() {
+export default function QRCodesAdminPage() {
   const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
-    // We are now using a fixed base URL, so we don't need to get it from window.location
+    // We are now using a fixed base URL
     setBaseUrl('splat-qr.vercel.app');
   }, []);
 
@@ -64,7 +64,7 @@ export default function QRCodesPage() {
 
       <div className="max-w-7xl mx-auto no-print">
          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-primary flex items-center gap-3"><QrCode/> QR Codes</h1>
+            <h1 className="text-4xl font-bold text-primary flex items-center gap-3"><QrCode/> QR Codes Admin</h1>
             <div className="flex gap-2">
                  <Button onClick={handlePrint} className='h-12'>
                     <Printer className="mr-2 h-5 w-5" />
@@ -81,7 +81,7 @@ export default function QRCodesPage() {
       </div>
      
       <div id="print-area" className="max-w-7xl mx-auto">
-         <h1 className="text-3xl font-bold text-center mb-6 print:visible hidden">SplatTag QR Codes</h1>
+         <h1 className="text-3xl font-bold text-center mb-6 print:visible hidden">SplatQR QR Codes</h1>
         
          <div className="grid grid-cols-1 xl:grid-cols-[3fr_1fr] gap-6">
             <Card className="qr-card">
