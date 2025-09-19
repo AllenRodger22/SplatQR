@@ -2,11 +2,10 @@
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { db, auth } from '@/lib/firebase';
-import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs, addDoc, getDoc } from 'firebase/firestore';
 import type { Game, Player, TeamId, CaptureStats } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { v4 as uuidv4 } from 'uuid';
 import { ZONE_DEFINITIONS } from '@/lib/zones';
 
 const createDefaultCaptureStats = (): CaptureStats => ({
@@ -57,8 +56,7 @@ interface GameContextType {
   game: Game | null;
   loading: boolean;
   gameId: string | null;
-  login: (email:string, password:string) => Promise<User | null>;
-  signup: (email:string, password:string, name: string, emoji: string) => Promise<User | null>;
+  signInWithGoogle: () => Promise<User | null>;
   logout: () => Promise<void>;
   joinTeam: (teamId: TeamId) => Promise<void>;
   selectColor: (teamId: TeamId, color: string) => Promise<void>;
@@ -92,9 +90,13 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
             if (playerDoc.exists()) {
                 setPlayer({ id: user.uid, ...playerDoc.data() } as Player);
             } else {
-                // If the user exists in Auth but not in Firestore, something is wrong.
-                // For this app, we'll assume a player doc always exists for a logged in user.
-                 setPlayer(null); 
+                // Auto-create player on first login
+                const newPlayer = {
+                    name: user.displayName || 'Jogador Anônimo',
+                    emoji: '🦑',
+                };
+                await setDoc(playerDocRef, newPlayer);
+                setPlayer({ id: user.uid, ...newPlayer });
             }
         } else {
             setPlayer(null);
@@ -165,30 +167,21 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [gameId, toast]);
 
-  const login = async (email: string, password: string): Promise<User | null> => {
+  const signInWithGoogle = async (): Promise<User | null> => {
     if (!auth) return null;
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const result = await signInWithPopup(auth, provider);
+      toast({ title: 'Login bem-sucedido!', description: `Bem-vindo, ${result.user.displayName}!` });
+      return result.user;
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Erro de Login', description: error.message });
+      toast({ variant: 'destructive', title: 'Erro de Login', description: 'Não foi possível fazer login com o Google.' });
+      console.error("Google sign-in error:", error);
       return null;
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const signup = async (email: string, password: string, name: string, emoji: string): Promise<User | null> => {
-      if (!auth || !db) return null;
-      try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = userCredential.user;
-          const newPlayer = { name, emoji };
-          await setDoc(doc(db, 'players', user.uid), newPlayer);
-          setPlayer({ id: user.uid, ...newPlayer });
-          return user;
-      } catch (error: any) {
-          toast({ variant: 'destructive', title: 'Erro no Cadastro', description: error.message });
-          return null;
-      }
   };
 
   const logout = async () => {
@@ -455,7 +448,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <GameContext.Provider value={{ user, player, game, loading, gameId, setGameId, login, signup, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
+    <GameContext.Provider value={{ user, player, game, loading, gameId, setGameId, signInWithGoogle, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
       {children}
     </GameContext.Provider>
   );
