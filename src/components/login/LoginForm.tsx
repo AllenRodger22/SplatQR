@@ -28,15 +28,15 @@ export function LoginForm() {
           <PaintRoller className="h-8 w-8" />
         </div>
         <CardTitle className="text-4xl">SplatTag</CardTitle>
-        <CardDescription>Create Your Player Profile</CardDescription>
+        <CardDescription>Crie Seu Perfil de Jogador</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Player Name</Label>
+            <Label htmlFor="name">Nome do Jogador</Label>
             <Input
               id="name"
-              placeholder="e.g. Agent 3"
+              placeholder="ex: Agente 3"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -44,13 +44,13 @@ export function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Choose Your Symbol</Label>
+            <Label>Escolha Seu Símbolo</Label>
             <EmojiPicker value={emoji} onChange={setEmoji} />
           </div>
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full h-14 text-xl font-bold transform hover:scale-105 transition-transform" disabled={!name.trim()}>
-            Join the Fray!
+            Entrar na Batalha!
           </Button>
         </CardFooter>
       </form>

@@ -14,8 +14,8 @@ export function ZoneGrid() {
   return (
     <Card className="h-full">
       <CardHeader className="text-center">
-        <CardTitle className="text-3xl">Capture Zones</CardTitle>
-        <CardDescription>Scan QR codes to capture zones for your team!</CardDescription>
+        <CardTitle className="text-3xl">Zonas de Captura</CardTitle>
+        <CardDescription>Escaneie os QR codes para capturar zonas para sua equipe!</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-4 md:grid-cols-6 gap-4">

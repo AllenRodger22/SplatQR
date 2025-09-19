@@ -93,31 +93,31 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
               </svg>
               <span className="absolute text-6xl font-black">{countdown}</span>
             </div>
-            <h1 className="text-3xl font-bold mt-4">Capturing Zone {zoneId.split('-')[1].toUpperCase()}...</h1>
-            <p className="text-muted-foreground">Hold your ground!</p>
+            <h1 className="text-3xl font-bold mt-4">Capturando Zona {zoneId.split('-')[1].toUpperCase()}...</h1>
+            <p className="text-muted-foreground">Mantenha sua posição!</p>
           </>
         );
       case 'capturing':
         return (
           <>
             <Loader2 className="h-24 w-24 animate-spin text-primary" />
-            <h1 className="text-3xl font-bold mt-4">Processing Capture...</h1>
+            <h1 className="text-3xl font-bold mt-4">Processando Captura...</h1>
           </>
         );
       case 'success':
         return (
           <>
             <CheckCircle className="h-24 w-24 text-green-500" />
-            <h1 className="text-3xl font-bold mt-4 text-green-400">Zone Captured!</h1>
-            <p className="text-muted-foreground">Redirecting back to game...</p>
+            <h1 className="text-3xl font-bold mt-4 text-green-400">Zona Capturada!</h1>
+            <p className="text-muted-foreground">Redirecionando de volta para o jogo...</p>
           </>
         );
       case 'already_owned':
         return (
           <>
             <ShieldQuestion className="h-24 w-24 text-blue-500" />
-            <h1 className="text-3xl font-bold mt-4 text-blue-400">Zone Already Yours!</h1>
-            <p className="text-muted-foreground">Your team already controls this zone.</p>
+            <h1 className="text-3xl font-bold mt-4 text-blue-400">Zona Já é Sua!</h1>
+            <p className="text-muted-foreground">Sua equipe já controla esta zona.</p>
           </>
         );
       case 'failure':
@@ -126,10 +126,10 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
           <>
             <XCircle className="h-24 w-24 text-red-500" />
             <h1 className="text-3xl font-bold mt-4 text-red-400">
-                {status === 'invalid' ? 'Invalid QR Code' : 'Capture Failed!'}
+                {status === 'invalid' ? 'QR Code Inválido' : 'Captura Falhou!'}
             </h1>
             <p className="text-muted-foreground">
-                {game?.status !== 'playing' ? 'The game is not currently active.' : 'Redirecting back to game...'}
+                {game?.status !== 'playing' ? 'O jogo não está ativo no momento.' : 'Redirecionando de volta para o jogo...'}
             </p>
           </>
         );

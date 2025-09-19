@@ -14,8 +14,8 @@ const NUM_ZONES = 11;
 const defaultGame: Game = {
   status: 'setup',
   teams: {
-    splatSquad: { name: 'Splat Squad', color: '#FF00FF', players: [] },
-    inkMasters: { name: 'Ink Masters', color: '#00FFFF', players: [] },
+    splatSquad: { name: 'Esquadrão Splat', color: '#FF00FF', players: [] },
+    inkMasters: { name: 'Mestres da Tinta', color: '#00FFFF', players: [] },
   },
   zones: Array.from({ length: NUM_ZONES }, (_, i) => ({
     id: `zone-${String.fromCharCode(97 + i)}`,
@@ -54,10 +54,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const resetGame = useCallback(async () => {
     try {
       await setDoc(gameDocRef, defaultGame);
-      toast({ title: 'Game Reset!', description: 'Ready for a new match.' });
+      toast({ title: 'Jogo Reiniciado!', description: 'Pronto para uma nova partida.' });
     } catch (error) {
       console.error('Error resetting game:', error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not reset the game.' });
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível reiniciar o jogo.' });
     }
   }, [gameDocRef, toast]);
 
@@ -71,7 +71,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       setLoading(false);
     }, (error) => {
       console.error('Error fetching game state:', error);
-      toast({ variant: 'destructive', title: 'Connection Error', description: 'Could not sync game state.' });
+      toast({ variant: 'destructive', title: 'Erro de Conexão', description: 'Não foi possível sincronizar o estado do jogo.' });
       setLoading(false);
     });
 
@@ -81,7 +81,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   const login = (name: string, emoji: string) => {
     const newPlayer: Player = { id: uuidv4(), name, emoji };
     setPlayer(newPlayer);
-    toast({ title: `Welcome, ${name}!`, description: 'Get ready to splat!' });
+    toast({ title: `Bem-vindo, ${name}!`, description: 'Prepare-se para a batalha!' });
   };
 
   const logout = () => {
@@ -96,7 +96,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const isPlayerInTeam = game.teams[teamId].players.some(p => p.id === player.id);
 
     if (isPlayerInTeam) {
-        toast({ title: "You're already on this team!" });
+        toast({ title: "Você já está nesta equipe!" });
         return;
     }
 
@@ -117,10 +117,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   
     try {
       await batch.commit();
-      toast({ title: 'Team Joined!', description: `You are now part of ${game.teams[teamId].name}!` });
+      toast({ title: 'Entrou na Equipe!', description: `Você agora faz parte do ${game.teams[teamId].name}!` });
     } catch (error) {
       console.error("Error joining team: ", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not join the team.' });
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível entrar na equipe.' });
     }
   };
 
@@ -128,14 +128,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (!game) return;
     const otherTeamId = teamId === 'splatSquad' ? 'inkMasters' : 'splatSquad';
     if (game.teams[otherTeamId].color === color) {
-      toast({ variant: 'destructive', title: 'Color Taken!', description: 'The other team has already chosen this color.' });
+      toast({ variant: 'destructive', title: 'Cor já escolhida!', description: 'A outra equipe já escolheu esta cor.' });
       return;
     }
     try {
       await updateDoc(gameDocRef, { [`teams.${teamId}.color`]: color });
     } catch (error) {
       console.error("Error selecting color: ", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not select color.' });
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível selecionar a cor.' });
     }
   };
 
@@ -144,7 +144,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     const { splatSquad, inkMasters } = game.teams;
     if (splatSquad.players.length < 2 || inkMasters.players.length < 2) {
-      toast({ variant: 'destructive', title: 'Not enough players!', description: 'Each team needs at least 2 players to start.' });
+      toast({ variant: 'destructive', title: 'Jogadores insuficientes!', description: 'Cada equipe precisa de pelo menos 2 jogadores para começar.' });
       return;
     }
     
@@ -152,7 +152,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     const hasVoted15 = game.votes[15].includes(player.id);
     const hasVoted30 = game.votes[30].includes(player.id);
     if(hasVoted15 || hasVoted30) {
-        toast({title: "You've already voted!"});
+        toast({title: "Você já votou!"});
         return;
     }
 
@@ -166,16 +166,16 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       updates.status = 'playing';
       updates.gameStartTime = serverTimestamp();
       updates.gameDuration = duration;
-      toast({ title: 'Game On!', description: `The match has started and will last ${duration} minutes!` });
+      toast({ title: 'Jogo Começou!', description: `A partida começou e durará ${duration} minutos!` });
     } else {
-        toast({title: 'Vote Cast!', description: `You voted for a ${duration} minute game.`});
+        toast({title: 'Voto Computado!', description: `Você votou por um jogo de ${duration} minutos.`});
     }
 
     try {
       await updateDoc(gameDocRef, updates);
     } catch (error) {
       console.error("Error voting to start: ", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not start the game.' });
+      toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível iniciar o jogo.' });
     }
   };
   
@@ -189,18 +189,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       : null;
 
     if (!playerTeamId) {
-      toast({ variant: 'destructive', title: 'Not on a team!', description: 'You must join a team to capture zones.' });
+      toast({ variant: 'destructive', title: 'Você não está em uma equipe!', description: 'Você deve se juntar a uma equipe para capturar zonas.' });
       return;
     }
 
     const zone = game.zones.find(z => z.id === zoneId);
     if (!zone) {
-      toast({ variant: 'destructive', title: 'Invalid Zone', description: 'This QR code is not for a valid zone.' });
+      toast({ variant: 'destructive', title: 'Zona Inválida', description: 'Este QR code não corresponde a uma zona válida.' });
       return;
     }
     
     if (zone.capturedBy === playerTeamId) {
-        toast({ title: 'Zone Secured!', description: 'Your team already holds this zone.' });
+        toast({ title: 'Zona Segura!', description: 'Sua equipe já domina esta zona.' });
         return;
     }
 
@@ -212,7 +212,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       await updateDoc(gameDocRef, { zones: updatedZones });
-      toast({ title: 'Zone Captured!', description: `You captured zone ${zoneId.split('-')[1].toUpperCase()} for your team!` });
+      toast({ title: 'Zona Capturada!', description: `Você capturou a zona ${zoneId.split('-')[1].toUpperCase()} para sua equipe!` });
       
       const allZonesCaptured = updatedZones.every(z => z.capturedBy === playerTeamId);
       if (allZonesCaptured) {
@@ -224,7 +224,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     } catch (error) {
       console.error('Error capturing zone:', error);
-      toast({ variant: 'destructive', title: 'Capture Failed', description: 'Could not capture the zone.' });
+      toast({ variant: 'destructive', title: 'Captura Falhou', description: 'Não foi possível capturar a zona.' });
     }
   };
 

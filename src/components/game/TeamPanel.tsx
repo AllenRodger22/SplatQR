@@ -32,7 +32,7 @@ export function TeamPanel({ teamId, score }: TeamPanelProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow space-y-2">
-        <h4 className="font-semibold text-center text-muted-foreground">Players ({team.players.length})</h4>
+        <h4 className="font-semibold text-center text-muted-foreground">Jogadores ({team.players.length})</h4>
          <div className="space-y-2">
             {team.players.map(p => (
               <div key={p.id} className={cn(

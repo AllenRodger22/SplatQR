@@ -47,10 +47,10 @@ export function ColorPicker({ teamId }: ColorPickerProps) {
               isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'
             )}
             style={{ backgroundColor: color }}
-            aria-label={`Select color ${color}`}
+            aria-label={`Selecionar cor ${color}`}
           >
             {isSelected && <Check className="h-6 w-6 text-black/70 stroke-[3]" />}
-            {isDisabled && <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-xs">TAKEN</div>}
+            {isDisabled && <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-xs">USADA</div>}
           </button>
         );
       })}

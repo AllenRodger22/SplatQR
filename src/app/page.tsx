@@ -26,7 +26,7 @@ export default function Home() {
       return (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p>Loading Game...</p>
+          <p>Carregando Jogo...</p>
         </div>
       );
     }
@@ -35,7 +35,7 @@ export default function Home() {
        return (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p>Redirecting...</p>
+          <p>Redirecionando...</p>
         </div>
       );
     }

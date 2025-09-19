@@ -33,7 +33,7 @@ export default function SetupPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4">Loading game setup...</p>
+        <p className="mt-4">Carregando configuração do jogo...</p>
       </div>
     );
   }
@@ -42,8 +42,8 @@ export default function SetupPage() {
     <ClientOnly>
       <div className="container mx-auto min-h-screen p-4 md:p-8 animate-in fade-in duration-500">
         <header className="text-center mb-8">
-          <h1 className="text-5xl font-bold tracking-tighter text-primary">Game Setup</h1>
-          <p className="text-xl text-muted-foreground mt-2">Assemble your teams and get ready to splat!</p>
+          <h1 className="text-5xl font-bold tracking-tighter text-primary">Configuração do Jogo</h1>
+          <p className="text-xl text-muted-foreground mt-2">Monte suas equipes e prepare-se para a batalha!</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
@@ -55,12 +55,12 @@ export default function SetupPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-3xl">
               <Vote className="h-8 w-8 text-accent" />
-              Vote for Game Duration
+              Votação para Duração do Jogo
             </CardTitle>
             <CardDescription>
               {canStartGame 
-                ? 'The first vote will start the match! Each team needs at least 2 players.'
-                : 'Each team needs at least 2 players to start the game.'
+                ? 'O primeiro voto iniciará a partida! Cada equipe precisa de pelo menos 2 jogadores.'
+                : 'Cada equipe precisa de pelo menos 2 jogadores para iniciar o jogo.'
               }
             </CardDescription>
           </CardHeader>
@@ -70,7 +70,7 @@ export default function SetupPage() {
               onClick={() => voteToStart?.(15)} 
               disabled={!canStartGame || playerHasVoted}
             >
-              15 Minutes
+              15 Minutos
               <div className="ml-2 flex items-center text-sm bg-background/50 rounded-full px-2 py-1">
                 <Users className="h-4 w-4 mr-1"/> {game.votes[15].length}
               </div>
@@ -80,7 +80,7 @@ export default function SetupPage() {
               onClick={() => voteToStart?.(30)}
               disabled={!canStartGame || playerHasVoted}
             >
-              30 Minutes
+              30 Minutos
                <div className="ml-2 flex items-center text-sm bg-background/50 rounded-full px-2 py-1">
                 <Users className="h-4 w-4 mr-1"/> {game.votes[30].length}
               </div>

@@ -29,17 +29,17 @@ export function TeamCard({ teamId }: TeamCardProps) {
           <div className="w-4 h-8 rounded-full" style={{ backgroundColor: team.color }} />
           {team.name}
         </CardTitle>
-        <CardDescription>Select your team's color and see who's joined.</CardDescription>
+        <CardDescription>Selecione a cor da sua equipe e veja quem já entrou.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">
         <div>
-          <h4 className="font-semibold mb-2 text-muted-foreground">Team Color</h4>
+          <h4 className="font-semibold mb-2 text-muted-foreground">Cor da Equipe</h4>
           <ColorPicker teamId={teamId} />
         </div>
         <div>
           <h4 className="font-semibold mb-2 text-muted-foreground flex items-center gap-2">
             <Users className="h-5 w-5" />
-            Players ({team.players.length})
+            Jogadores ({team.players.length})
           </h4>
           <div className="space-y-2 min-h-[80px]">
             {team.players.length > 0 ? team.players.map(p => (
@@ -49,7 +49,7 @@ export function TeamCard({ teamId }: TeamCardProps) {
                 </Avatar>
                 <span className="font-medium">{p.name}</span>
               </div>
-            )) : <p className="text-sm text-muted-foreground italic text-center pt-4">No players on this team yet.</p>}
+            )) : <p className="text-sm text-muted-foreground italic text-center pt-4">Nenhum jogador nesta equipe ainda.</p>}
           </div>
         </div>
       </CardContent>
@@ -63,7 +63,7 @@ export function TeamCard({ teamId }: TeamCardProps) {
             color: isPlayerOnThisTeam ? 'black' : undefined,
           }}
         >
-          {isPlayerOnThisTeam ? "You're on this Team" : 'Join Team'}
+          {isPlayerOnThisTeam ? "Você está nesta Equipe" : 'Juntar-se à Equipe'}
         </Button>
       </div>
     </Card>

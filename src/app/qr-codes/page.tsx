@@ -59,12 +59,12 @@ export default function QRCodesPage() {
             <div className="flex gap-2">
                  <Button onClick={handlePrint} className='h-12'>
                     <Printer className="mr-2 h-5 w-5" />
-                    Print Codes
+                    Imprimir Códigos
                 </Button>
                 <Button asChild variant="outline" className="h-12">
                     <Link href="/game">
                         <Home className="mr-2 h-5 w-5"/>
-                        Back to Game
+                        Voltar para o Jogo
                     </Link>
                 </Button>
             </div>
@@ -75,8 +75,8 @@ export default function QRCodesPage() {
          <h1 className="text-3xl font-bold text-center mb-6 print:visible hidden">SplatTag QR Codes</h1>
         <Card className="mb-8">
             <CardHeader>
-                <CardTitle>Login QR Code</CardTitle>
-                <CardDescription>Share this to help new players join the game.</CardDescription>
+                <CardTitle>QR Code de Login</CardTitle>
+                <CardDescription>Compartilhe para ajudar novos jogadores a entrar no jogo.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center text-center gap-4">
                  <div className="bg-white p-4 rounded-lg">
@@ -88,13 +88,13 @@ export default function QRCodesPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>Zone QR Codes</CardTitle>
-                <CardDescription>Print and place these in your play area.</CardDescription>
+                <CardTitle>QR Codes de Zona</CardTitle>
+                <CardDescription>Imprima e coloque estes na sua área de jogo.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {zones.map(zone => (
                     <div key={zone.id} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card">
-                        <h3 className="font-bold text-xl">Zone {zone.id.split('-')[1].toUpperCase()}</h3>
+                        <h3 className="font-bold text-xl">Zona {zone.id.split('-')[1].toUpperCase()}</h3>
                         <div className="bg-white p-2 rounded-md">
                             <QRCode value={zone.url} size={128} />
                         </div>

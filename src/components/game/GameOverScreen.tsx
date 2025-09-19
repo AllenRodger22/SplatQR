@@ -15,13 +15,13 @@ export function GameOverScreen() {
 
   const getWinnerText = () => {
     if (game.winner === 'draw') {
-      return { text: "It's a Draw!", color: 'text-gray-400' };
+      return { text: "É um Empate!", color: 'text-gray-400' };
     }
     if (game.winner) {
       const winnerTeam = game.teams[game.winner as TeamId];
-      return { text: `${winnerTeam.name} Wins!`, color: winnerTeam.color };
+      return { text: `${winnerTeam.name} Venceu!`, color: winnerTeam.color };
     }
-    return { text: 'Game Over!', color: 'text-white' };
+    return { text: 'Fim de Jogo!', color: 'text-white' };
   };
 
   const { text, color } = getWinnerText();
@@ -31,7 +31,7 @@ export function GameOverScreen() {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-in fade-in">
       <div className="relative w-full max-w-lg m-4 p-8 bg-background border-4 border-primary rounded-xl shadow-2xl shadow-primary/40 text-center animate-bounce-in">
         {!isDraw && <Crown className="absolute -top-10 left-1/2 -translate-x-1/2 h-20 w-20 text-yellow-400" />}
-        <h2 className="text-2xl font-bold text-muted-foreground mb-2">Game Over</h2>
+        <h2 className="text-2xl font-bold text-muted-foreground mb-2">Fim de Jogo</h2>
         <h1
           className={cn("text-6xl font-black tracking-tighter transition-colors", isDraw && 'text-foreground')}
           style={!isDraw ? { color: color } : {}}
@@ -58,7 +58,7 @@ export function GameOverScreen() {
         </div>
 
         <Button onClick={resetGame} className="w-full h-14 text-xl font-bold mt-4 transition-transform hover:scale-105">
-          Play Again
+          Jogar Novamente
         </Button>
       </div>
     </div>
