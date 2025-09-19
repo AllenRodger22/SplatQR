@@ -65,7 +65,7 @@ export function Timer() {
   if (!game || !game.gameStartTime) {
     const duration = game?.gameDuration || 15;
     return (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xl font-bold text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 text-xl font-bold text-muted-foreground mt-2">
             <TimerIcon className="h-6 w-6" />
             {String(duration).padStart(2, '0')}:00
         </div>
@@ -74,7 +74,7 @@ export function Timer() {
 
   return (
     <div className={cn(
-        "absolute top-2 left-1/2 -translate-x-1/2 flex items-center gap-2 text-2xl font-black transition-colors duration-300",
+        "flex items-center justify-center gap-2 text-2xl font-black transition-colors duration-300 mt-2",
         isEnding ? "text-red-500 animate-pulse" : "text-foreground"
     )}>
         <TimerIcon className="h-7 w-7" />

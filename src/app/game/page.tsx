@@ -48,10 +48,10 @@ export default function GamePage() {
       {game.status === 'finished' && <GameOverScreen />}
       <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
         <header className="relative text-center mb-4 animate-bounce-in">
-          <Timer />
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
             SplatTag
           </h1>
+          <Timer />
         </header>
 
         <main className="flex-grow flex flex-col gap-4">
