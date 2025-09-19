@@ -62,7 +62,7 @@ export default function GamePage() {
     <ClientOnly>
       {game.status === 'finished' && <GameOverScreen />}
       <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
-        <header className="relative text-center mb-4 animate-bounce-in">
+        <header className="relative text-center mb-4 animate-bounce-in bg-background/60 backdrop-blur-sm p-4 rounded-xl">
           <h1 className="text-5xl md:text-6xl font-black tracking-tighter" style={{color: 'hsl(var(--primary))'}}>
             SplatQR
           </h1>

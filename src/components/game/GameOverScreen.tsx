@@ -28,8 +28,8 @@ export function GameOverScreen() {
   const isDraw = game.winner === 'draw';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-in fade-in">
-      <div className="relative w-full max-w-lg m-4 p-8 bg-background border-4 border-primary rounded-xl shadow-2xl shadow-primary/40 text-center animate-bounce-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in">
+      <div className="relative w-full max-w-lg m-4 p-8 bg-background/80 backdrop-blur-xl border-4 border-primary rounded-xl shadow-2xl shadow-primary/40 text-center animate-bounce-in">
         {!isDraw && <Crown className="absolute -top-10 left-1/2 -translate-x-1/2 h-20 w-20 text-yellow-400" />}
         <h2 className="text-2xl font-bold text-muted-foreground mb-2">Fim de Jogo</h2>
         <h1

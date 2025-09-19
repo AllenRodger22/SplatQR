@@ -71,7 +71,7 @@ function HomePageContent() {
 
   return (
     <div className="w-full max-w-md space-y-8">
-      <Card className="animate-bounce-in border-primary/50 shadow-lg shadow-primary/20">
+      <Card className="animate-bounce-in bg-card/80 backdrop-blur-sm border-primary/50 shadow-lg shadow-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-3xl">
             <Gamepad2 className="h-8 w-8" />
@@ -86,7 +86,7 @@ function HomePageContent() {
         </CardFooter>
       </Card>
 
-      <Card className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
+      <Card className="animate-bounce-in bg-card/80 backdrop-blur-sm" style={{ animationDelay: '200ms' }}>
         <CardHeader>
           <CardTitle className="text-3xl">Entrar na Sala</CardTitle>
           <CardDescription>Já tem um código? Insira abaixo para entrar no jogo.</CardDescription>

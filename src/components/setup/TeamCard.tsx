@@ -34,7 +34,7 @@ export function TeamCard({ teamId }: TeamCardProps) {
     : 'Juntar-se à Equipe';
 
   return (
-    <Card className="flex flex-col animate-bounce-in">
+    <Card className="flex flex-col animate-bounce-in bg-card/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-3 text-3xl">
           <div className="w-4 h-8 rounded-full" style={{ backgroundColor: team.color }} />

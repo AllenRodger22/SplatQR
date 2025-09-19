@@ -13,7 +13,7 @@ export function ZoneGrid() {
   const { zones, teams } = context.game;
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-card/80 backdrop-blur-sm">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl">Zonas de Captura</CardTitle>
         <CardDescription>Escaneie os QR codes para capturar zonas para sua equipe!</CardDescription>

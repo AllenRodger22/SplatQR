@@ -86,14 +86,14 @@ export default function SetupPage() {
   return (
     <ClientOnly>
       <div className="container mx-auto min-h-screen p-4 md:p-8 animate-in fade-in duration-500">
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 bg-background/60 backdrop-blur-sm p-4 rounded-xl">
           <h1 className="text-5xl font-bold tracking-tighter text-primary">Configuração do Jogo</h1>
           <p className="text-xl text-muted-foreground mt-2">
             Monte suas equipes e prepare-se para a batalha!
           </p>
         </header>
         
-        <Card className="mb-8 animate-bounce-in border-accent/50 shadow-lg shadow-accent/10">
+        <Card className="mb-8 animate-bounce-in bg-card/80 backdrop-blur-sm border-accent/50 shadow-lg shadow-accent/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-3xl">
               <Share2 className="h-8 w-8" /> Convide seus Amigos
@@ -139,7 +139,7 @@ export default function SetupPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
+          <Card className="animate-bounce-in bg-card/80 backdrop-blur-sm" style={{ animationDelay: '200ms' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-3xl">
                 <Vote className="h-8 w-8 text-accent" />
@@ -175,7 +175,7 @@ export default function SetupPage() {
             </CardContent>
           </Card>
 
-          <Card className="animate-bounce-in" style={{ animationDelay: '300ms' }}>
+          <Card className="animate-bounce-in bg-card/80 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-3xl">
                     <Gamepad2 className="h-8 w-8 text-primary"/>

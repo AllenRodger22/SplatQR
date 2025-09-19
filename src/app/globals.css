@@ -32,9 +32,9 @@
   }
 
   .dark {
-    --background: 60 8% 14%; /* Monokai Background */
+    --background: 260 10% 8%; /* Darker, slightly purplish background */
     --foreground: 60 30% 96%; /* Monokai Foreground */
-    --card: 60 8% 17%;
+    --card: 260 10% 12%; /* Card with some transparency */
     --card-foreground: 60 30% 96%;
     --popover: 60 8% 10%;
     --popover-foreground: 60 30% 96%;
@@ -48,7 +48,7 @@
     --accent-foreground: 60 30% 96%;
     --destructive: 0 63% 51%;
     --destructive-foreground: 60 30% 96%;
-    --border: 60 7% 25%;
+    --border: 60 7% 30%; /* Lighter border for the glass effect */
     --input: 60 7% 22%;
     --ring: 76 74% 53%; /* Monokai Green for rings */
     --chart-1: 220 70% 50%;

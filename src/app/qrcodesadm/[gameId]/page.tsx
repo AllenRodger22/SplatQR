@@ -155,7 +155,7 @@ export default function QRCodesAdmPage() {
         <div id="print-area" className="space-y-6">
           <h2 className="hidden text-center text-3xl font-bold print:block">QR Codes Oficiais - Sala {gameId}</h2>
           
-          <Card className="qr-card">
+          <Card className="qr-card bg-background/80 backdrop-blur">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                   <LogIn className="h-5 w-5 text-accent" /> Login na Sala
@@ -171,7 +171,7 @@ export default function QRCodesAdmPage() {
           </Card>
 
 
-          <Card className="qr-card">
+          <Card className="qr-card bg-background/80 backdrop-blur">
             <CardHeader>
               <CardTitle>Zonas de captura</CardTitle>
               <CardDescription>Escaneie o código correspondente e aguarde 10 segundos para capturar.</CardDescription>

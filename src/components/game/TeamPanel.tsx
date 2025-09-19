@@ -22,7 +22,7 @@ export function TeamPanel({ teamId, score }: TeamPanelProps) {
   const recaptures = captureStats?.recaptures?.[teamId] ?? 0;
 
   return (
-    <Card className="h-full flex flex-col" style={{'--team-color': team.color} as React.CSSProperties}>
+    <Card className="h-full flex flex-col bg-card/80 backdrop-blur-sm" style={{'--team-color': team.color} as React.CSSProperties}>
       <CardHeader>
         <CardTitle className="flex flex-col items-center gap-2 text-center">
             <div className="flex items-center gap-3">

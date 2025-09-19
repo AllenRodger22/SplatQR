@@ -150,7 +150,7 @@ export default function QRCodesAdm22Page() {
         <div id="print-area" className="space-y-6">
           <h2 className="hidden text-center text-3xl font-bold print:block">QR Codes Oficiais do SplatQR</h2>
 
-          <Card className="qr-card">
+          <Card className="qr-card bg-background/80 backdrop-blur">
             <CardHeader>
               <CardTitle>Zonas de captura</CardTitle>
               <CardDescription>Escaneie o código correspondente e aguarde 10 segundos para capturar.</CardDescription>
@@ -182,7 +182,7 @@ export default function QRCodesAdm22Page() {
           </Card>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card className="qr-card">
+            <Card className="qr-card bg-background/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <LogIn className="h-5 w-5 text-primary" /> Login instantâneo
@@ -197,7 +197,7 @@ export default function QRCodesAdm22Page() {
               </CardContent>
             </Card>
 
-            <Card className="qr-card">
+            <Card className="qr-card bg-background/80 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <LogIn className="h-5 w-5 text-accent" /> Login manual

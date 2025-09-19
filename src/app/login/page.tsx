@@ -65,7 +65,7 @@ function LoginContent() {
   }
   
   return (
-     <Card className="w-full max-w-md animate-bounce-in border-2 border-primary/50 shadow-lg shadow-primary/20">
+     <Card className="w-full max-w-md animate-bounce-in bg-card/80 backdrop-blur-sm border-primary/50 shadow-lg shadow-primary/20">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary">
           <PaintRoller className="h-8 w-8" />
