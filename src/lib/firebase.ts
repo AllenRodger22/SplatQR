@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, initializeFirestore, memoryLocalCache } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import 'dotenv/config';
 
 const firebaseConfig: FirebaseOptions = {
@@ -26,5 +27,6 @@ const db = app ? initializeFirestore(app, {
   localCache: memoryLocalCache(),
 }) : null;
 
+const auth = app ? getAuth(app) : null;
 
-export { db };
+export { db, auth };

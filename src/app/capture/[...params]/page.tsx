@@ -18,7 +18,7 @@ export default function CapturePage() {
   const zoneUuid = params.params?.[1];
 
   const context = useContext(GameContext);
-  const { player, game, captureZone, loading, setGameId } = context || {};
+  const { player, user, game, captureZone, loading, setGameId } = context || {};
   
   const [timeLeft, setTimeLeft] = useState(10);
   const [progress, setProgress] = useState(0);
@@ -58,10 +58,10 @@ export default function CapturePage() {
 
   useEffect(() => {
     if (loading || !gameId) return;
-    if (!player) {
-      router.replace(`/manual-login?redirectTo=/capture/${gameId}/${zoneUuid}`);
+    if (!user) {
+      router.replace(`/login?redirectTo=/capture/${gameId}/${zoneUuid}`);
     }
-  }, [loading, player, router, gameId, zoneUuid]);
+  }, [loading, user, router, gameId, zoneUuid]);
 
   useEffect(() => {
     if (loading || !player || !game) return;

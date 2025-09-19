@@ -14,7 +14,7 @@ export interface CaptureEvent {
 }
 
 export interface Player {
-  id: string;
+  id: string; // Corresponds to Firebase Auth UID
   name: string;
   emoji: string;
 }

@@ -18,7 +18,7 @@ export default function SetupPage() {
   const gameId = Array.isArray(params.gameId) ? params.gameId[0] : params.gameId;
   
   const context = useContext(GameContext);
-  const { game, player, voteToStart, toggleReady, loading, setGameId } = context || {};
+  const { game, player, user, voteToStart, toggleReady, loading, setGameId } = context || {};
   const { toast } = useToast();
 
   const [gameUrl, setGameUrl] = useState('');
@@ -37,14 +37,14 @@ export default function SetupPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!player) {
-        router.replace(`/manual-login?redirectTo=/setup/${gameId}`);
+    if (!user) {
+        router.replace(`/login?redirectTo=/setup/${gameId}`);
         return;
     };
     if (game?.status === 'playing' || game?.status === 'finished') {
       router.replace(`/game/${gameId}`);
     }
-  }, [player, game, router, loading, gameId]);
+  }, [user, game, router, loading, gameId]);
 
   const playerIsInTeam = useMemo(() => {
     if (!game || !player) return false;

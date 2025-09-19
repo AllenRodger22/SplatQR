@@ -18,7 +18,7 @@ export default function GamePage() {
   const gameId = Array.isArray(params.gameId) ? params.gameId[0] : params.gameId;
 
   const context = useContext(GameContext);
-  const { game, player, loading, setGameId } = context || {};
+  const { game, player, user, loading, setGameId } = context || {};
 
   useEffect(() => {
     if (setGameId && gameId) {
@@ -28,14 +28,14 @@ export default function GamePage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!player) {
-      router.replace(`/manual-login?redirectTo=/game/${gameId}`);
+    if (!user) {
+      router.replace(`/login?redirectTo=/game/${gameId}`);
       return;
     }
     if (game?.status === 'setup') {
       router.replace(`/setup/${gameId}`);
     }
-  }, [loading, player, game, router, gameId]);
+  }, [loading, user, game, router, gameId]);
 
   const scores = useMemo(() => {
     if (!game) return { splatSquad: 0, inkMasters: 0 };
@@ -63,7 +63,7 @@ export default function GamePage() {
       {game.status === 'finished' && <GameOverScreen />}
       <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
         <header className="relative text-center mb-4 animate-bounce-in">
-          <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-primary">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tighter" style={{color: 'hsl(var(--primary))'}}>
             SplatQR
           </h1>
           <Timer />

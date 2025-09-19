@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useContext } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useContext, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Gamepad2, ArrowRight, Loader2 } from 'lucide-react';
+import { Gamepad2, ArrowRight, Loader2, LogOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { GameContext } from '@/context/GameContext';
-import { LoginForm } from '@/components/login/LoginForm';
 import ClientOnly from '@/components/client-only';
 
 function HomePageContent() {
@@ -21,6 +20,7 @@ function HomePageContent() {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const { logout } = useContext(GameContext)!;
 
   const handleCreateGame = () => {
     setIsCreating(true);
@@ -111,43 +111,46 @@ function HomePageContent() {
           </CardFooter>
         </form>
       </Card>
+
+      <div className="text-center animate-bounce-in" style={{ animationDelay: '400ms' }}>
+        <Button variant="ghost" onClick={logout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Sair
+        </Button>
+      </div>
     </div>
   );
 }
 
 export default function HomePage() {
   const context = useContext(GameContext);
-  const { player, loading, login } = context || {};
-  const [playerCreated, setPlayerCreated] = useState(!!player);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleLogin = (name: string, emoji: string) => {
-    if (login) {
-      login(name, emoji);
-      setPlayerCreated(true);
+  useEffect(() => {
+    if (!context?.loading && !context?.user) {
+        const redirectTo = searchParams.get('redirectTo');
+        router.replace(redirectTo ? `/login?redirectTo=${redirectTo}` : '/login');
     }
-  };
+  }, [context, router, searchParams]);
   
   return (
     <ClientOnly>
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
         <header className="mb-10 text-center">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-primary">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter" style={{color: 'hsl(var(--primary))'}}>
             SplatQR
           </h1>
           <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>
         </header>
 
-        {loading ? (
+        {context?.loading || !context?.user ? (
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
             <p>Carregando...</p>
           </div>
-        ) : playerCreated ? (
-          <HomePageContent />
         ) : (
-          <div className="w-full max-w-md">
-            <LoginForm onLogin={handleLogin} />
-          </div>
+          <HomePageContent />
         )}
       </div>
     </ClientOnly>

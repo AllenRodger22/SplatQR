@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { db } from '@/lib/firebase';
-import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs, addDoc } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { onAuthStateChanged, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, Timestamp, writeBatch, collection, getDocs, addDoc, getDoc } from 'firebase/firestore';
 import type { Game, Player, TeamId, CaptureStats } from '@/lib/types';
-import useLocalStorage from '@/hooks/use-local-storage';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { ZONE_DEFINITIONS } from '@/lib/zones';
@@ -52,12 +52,14 @@ const createDefaultGame = (): Game => ({
 });
 
 interface GameContextType {
+  user: User | null;
   player: Player | null;
   game: Game | null;
   loading: boolean;
   gameId: string | null;
-  login: (name: string, emoji: string) => Player;
-  logout: () => void;
+  login: (email:string, password:string) => Promise<User | null>;
+  signup: (email:string, password:string, name: string, emoji: string) => Promise<User | null>;
+  logout: () => Promise<void>;
   joinTeam: (teamId: TeamId) => Promise<void>;
   selectColor: (teamId: TeamId, color: string) => Promise<void>;
   voteToStart: (duration: 15 | 30) => Promise<void>;
@@ -70,14 +72,41 @@ interface GameContextType {
 export const GameContext = createContext<GameContextType | null>(null);
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
-  const [player, setPlayer] = useLocalStorage<Player | null>('splattag-player', null);
+  const [user, setUser] = useState<User | null>(null);
+  const [player, setPlayer] = useState<Player | null>(null);
   const [game, setGame] = useState<Game | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  useEffect(() => {
+    if (!auth) {
+        setLoading(false);
+        return;
+    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        setUser(user);
+        if (user) {
+            const playerDocRef = doc(db, 'players', user.uid);
+            const playerDoc = await getDoc(playerDocRef);
+            if (playerDoc.exists()) {
+                setPlayer({ id: user.uid, ...playerDoc.data() } as Player);
+            } else {
+                // If the user exists in Auth but not in Firestore, something is wrong.
+                // For this app, we'll assume a player doc always exists for a logged in user.
+                 setPlayer(null); 
+            }
+        } else {
+            setPlayer(null);
+        }
+        setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+
   const resetGame = useCallback(async () => {
-    if (!gameId) return;
+    if (!gameId || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
     try {
       const captureEventsRef = collection(db, 'games', gameId, 'captureEvents');
@@ -100,9 +129,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   }, [gameId, toast]);
 
   useEffect(() => {
-    if (!gameId) {
+    if (!gameId || !db) {
       setGame(null);
-      setLoading(false);
       return;
     }
     setLoading(true);
@@ -137,19 +165,46 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, [gameId, toast]);
 
-  const login = (name: string, emoji: string) => {
-    const newPlayer: Player = { id: uuidv4(), name, emoji };
-    setPlayer(newPlayer);
-    toast({ title: `Bem-vindo, ${name}!`, description: 'Prepare-se para a batalha!' });
-    return newPlayer;
+  const login = async (email: string, password: string): Promise<User | null> => {
+    if (!auth) return null;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Erro de Login', description: error.message });
+      return null;
+    }
   };
 
-  const logout = () => {
-    setPlayer(null);
+  const signup = async (email: string, password: string, name: string, emoji: string): Promise<User | null> => {
+      if (!auth || !db) return null;
+      try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+          const newPlayer = { name, emoji };
+          await setDoc(doc(db, 'players', user.uid), newPlayer);
+          setPlayer({ id: user.uid, ...newPlayer });
+          return user;
+      } catch (error: any) {
+          toast({ variant: 'destructive', title: 'Erro no Cadastro', description: error.message });
+          return null;
+      }
+  };
+
+  const logout = async () => {
+    if (!auth) return;
+    try {
+        await signOut(auth);
+        setUser(null);
+        setPlayer(null);
+        toast({ title: 'Você saiu.' });
+    } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Erro ao Sair', description: error.message });
+    }
   };
   
   const joinTeam = async (teamId: TeamId) => {
-    if (!player || !game || !gameId) return;
+    if (!player || !game || !gameId || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
@@ -198,7 +253,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const selectColor = async (teamId: TeamId, color: string) => {
-    if (!game || !player || !gameId) return;
+    if (!game || !player || !gameId || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
@@ -229,7 +284,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const voteToStart = async (duration: 15 | 30) => {
-    if (!player || !game || !gameId || game.status !== 'setup') return;
+    if (!player || !game || !gameId || game.status !== 'setup' || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
 
     if (game.readyPlayers.includes(player.id)) {
@@ -259,7 +314,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleReady = async () => {
-    if (!player || !game || !gameId) return;
+    if (!player || !game || !gameId || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
@@ -314,7 +369,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const captureZone = async (zoneId: string) => {
-    if (!player || !game || !gameId || game.status !== 'playing') return;
+    if (!player || !game || !gameId || game.status !== 'playing' || !db) return;
     const gameDocRef = doc(db, 'games', gameId);
 
     const playerTeamId = game.teams.splatSquad.players.some(p => p.id === player.id)
@@ -400,7 +455,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <GameContext.Provider value={{ player, game, loading, gameId, setGameId, login, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
+    <GameContext.Provider value={{ user, player, game, loading, gameId, setGameId, login, signup, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
       {children}
     </GameContext.Provider>
   );
