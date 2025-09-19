@@ -24,7 +24,7 @@ function HomePageContent() {
 
   const handleCreateGame = () => {
     setIsCreating(true);
-    const newGameId = uuidv4().slice(0, 8);
+    const newGameId = uuidv4().slice(0, 6);
     router.push(`/setup/${newGameId}`);
   };
 
@@ -42,6 +42,9 @@ function HomePageContent() {
     setIsJoining(true);
 
     try {
+      if (!db) {
+        throw new Error('Firebase not initialized');
+      }
       const gameDocRef = doc(db, 'games', gameId.trim());
       const gameDoc = await getDoc(gameDocRef);
 
@@ -56,6 +59,7 @@ function HomePageContent() {
         setIsJoining(false);
       }
     } catch (error) {
+      console.error(error);
       toast({
         variant: 'destructive',
         title: 'Erro ao entrar na sala',
@@ -127,7 +131,7 @@ export default function HomePage() {
     <ClientOnly>
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
         <header className="mb-10 text-center">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-primary">
             SplatQR
           </h1>
           <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>

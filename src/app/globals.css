@@ -10,13 +10,13 @@
     --card-foreground: 220 15% 20%;
     --popover: 220 20% 100%;
     --popover-foreground: 220 15% 20%;
-    --primary: 320 90% 55%; /* Vibrant Pink */
+    --primary: 320 90% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 15% 92%;
     --secondary-foreground: 220 15% 20%;
     --muted: 220 15% 92%;
     --muted-foreground: 220 10% 45%;
-    --accent: 170 85% 50%; /* Lime Green/Turquoise */
+    --accent: 170 85% 50%;
     --accent-foreground: 220 15% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -32,25 +32,25 @@
   }
 
   .dark {
-    --background: 240 10% 10%; /* Dark Splatoon-like */
-    --foreground: 210 40% 98%;
-    --card: 240 10% 15%;
-    --card-foreground: 210 40% 98%;
-    --popover: 240 10% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 320 90% 60%; /* Vibrant Pink */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 10% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 240 10% 20%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 170 85% 55%; /* Lime Green/Turquoise */
-    --accent-foreground: 220 15% 10%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 10% 25%;
-    --input: 240 10% 18%;
-    --ring: 170 85% 55%;
+    --background: 60 8% 14%; /* Monokai Background */
+    --foreground: 60 30% 96%; /* Monokai Foreground */
+    --card: 60 8% 17%;
+    --card-foreground: 60 30% 96%;
+    --popover: 60 8% 10%;
+    --popover-foreground: 60 30% 96%;
+    --primary: 76 74% 53%; /* Monokai Green */
+    --primary-foreground: 60 8% 14%;
+    --secondary: 60 7% 20%;
+    --secondary-foreground: 60 30% 96%;
+    --muted: 60 7% 20%;
+    --muted-foreground: 60 10% 60%;
+    --accent: 322 95% 69%; /* Monokai Pink */
+    --accent-foreground: 60 30% 96%;
+    --destructive: 0 63% 51%;
+    --destructive-foreground: 60 30% 96%;
+    --border: 60 7% 25%;
+    --input: 60 7% 22%;
+    --ring: 76 74% 53%; /* Monokai Green for rings */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;

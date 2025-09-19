@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, initializeFirestore, memoryLocalCache } from 'firebase/firestore';
+import 'dotenv/config';
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,13 +13,15 @@ const firebaseConfig: FirebaseOptions = {
 
 let app;
 if (firebaseConfig.projectId) {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  try {
+    app = getApp();
+  } catch (e) {
+    app = initializeApp(firebaseConfig);
+  }
 } else {
   console.warn("Firebase projectId is not set. Firebase will not be initialized.");
 }
 
-// Ensure db is exported, but it might be undefined if app isn't initialized.
-// The app should handle this gracefully.
 const db = app ? initializeFirestore(app, {
   localCache: memoryLocalCache(),
 }) : null;
