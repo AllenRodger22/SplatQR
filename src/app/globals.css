@@ -32,30 +32,30 @@
   }
 
   .dark {
-    --background: 260 10% 8%; /* Darker, slightly purplish background */
-    --foreground: 60 30% 96%; /* Monokai Foreground */
-    --card: 260 10% 12%; /* Card with some transparency */
-    --card-foreground: 60 30% 96%;
-    --popover: 60 8% 10%;
-    --popover-foreground: 60 30% 96%;
-    --primary: 76 74% 53%; /* Monokai Green */
-    --primary-foreground: 60 8% 14%;
-    --secondary: 60 7% 20%;
-    --secondary-foreground: 60 30% 96%;
-    --muted: 60 7% 20%;
-    --muted-foreground: 60 10% 60%;
-    --accent: 322 95% 69%; /* Monokai Pink */
-    --accent-foreground: 60 30% 96%;
-    --destructive: 0 63% 51%;
-    --destructive-foreground: 60 30% 96%;
-    --border: 60 7% 30%; /* Lighter border for the glass effect */
-    --input: 60 7% 22%;
-    --ring: 76 74% 53%; /* Monokai Green for rings */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 25 20% 8%; /* Tanoi Dark Brown */
+    --foreground: 35 30% 96%;
+    --card: 25 20% 12%; 
+    --card-foreground: 35 30% 96%;
+    --popover: 25 20% 10%;
+    --popover-foreground: 35 30% 96%;
+    --primary: 40 90% 55%; /* Golden */
+    --primary-foreground: 25 20% 10%;
+    --secondary: 25 20% 20%;
+    --secondary-foreground: 35 30% 96%;
+    --muted: 25 20% 20%;
+    --muted-foreground: 35 15% 60%;
+    --accent: 0 80% 60%; /* Red */
+    --accent-foreground: 35 30% 96%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 35 30% 96%;
+    --border: 25 20% 25%;
+    --input: 25 20% 22%;
+    --ring: 40 90% 55%; /* Golden */
+    --chart-1: 40 90% 55%;
+    --chart-2: 20 80% 50%;
+    --chart-3: 0 80% 60%;
+    --chart-4: 30 85% 55%;
+    --chart-5: 50 95% 55%;
   }
 }
 
@@ -65,12 +65,12 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Fredoka One', sans-serif;
+    font-family: 'Poppins', sans-serif;
   }
 }
 
 @layer utilities {
-  .text-gradient-gold {
-    @apply bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 bg-clip-text text-transparent;
+  .text-gradient-red-golden {
+    @apply bg-gradient-to-r from-red-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent;
   }
 }

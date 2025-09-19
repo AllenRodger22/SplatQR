@@ -147,7 +147,7 @@ export default function HomePage() {
     <ClientOnly>
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
         <header className="mb-10 text-center">
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-gradient-gold">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-gradient-red-golden">
             SplatQR
           </h1>
           <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>
