@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
-import { Loader2, CheckCircle, XCircle, ShieldQuestion } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import ClientOnly from '@/components/client-only';
 
 type CaptureStatus = 'counting' | 'capturing' | 'success' | 'failure' | 'invalid';
@@ -15,7 +15,10 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
   const [status, setStatus] = useState<CaptureStatus>('counting');
   
   const { player, game, captureZone, loading } = context || {};
-  const zoneId = params.uuid;
+  
+  // Extract the last character from the UUID to get the zone identifier
+  const zoneLetter = params.uuid.slice(-1);
+  const zoneId = `zone-${zoneLetter}`;
 
   useEffect(() => {
     if (!loading && !player) {

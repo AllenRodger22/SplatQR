@@ -13,15 +13,19 @@ export default function QRCodesPage() {
   const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
-    setBaseUrl(window.location.origin);
+    // We are now using a fixed base URL, so we don't need to get it from window.location
+    setBaseUrl('splat-qr.vercel.app');
   }, []);
 
-  const zones = Array.from({ length: NUM_ZONES }, (_, i) => ({
-    id: `zone-${String.fromCharCode(97 + i)}`,
-    url: `${baseUrl}/capture/zone-${String.fromCharCode(97 + i)}`,
-  }));
-
-  const loginUrl = `${baseUrl}/`;
+  const zones = Array.from({ length: NUM_ZONES }, (_, i) => {
+    const zoneLetter = String.fromCharCode(97 + i);
+    const uuid = '11111111111111111111' + zoneLetter;
+    return {
+      id: `zone-${zoneLetter}`,
+      url: `https://splat-qr.vercel.app/${uuid}`,
+      uuid: uuid
+    };
+  });
   
   const handlePrint = () => {
     window.print();
@@ -50,6 +54,9 @@ export default function QRCodesPage() {
           .no-print {
             display: none;
           }
+          .qr-card {
+            page-break-inside: avoid;
+          }
         }
       `}</style>
 
@@ -73,27 +80,15 @@ export default function QRCodesPage() {
      
       <div id="print-area" className="max-w-4xl mx-auto">
          <h1 className="text-3xl font-bold text-center mb-6 print:visible hidden">SplatTag QR Codes</h1>
-        <Card className="mb-8">
-            <CardHeader>
-                <CardTitle>QR Code de Login</CardTitle>
-                <CardDescription>Compartilhe para ajudar novos jogadores a entrar no jogo.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center text-center gap-4">
-                 <div className="bg-white p-4 rounded-lg">
-                    <QRCodeSVG value={loginUrl} size={256} />
-                 </div>
-                 <p className="font-mono text-sm break-all">{loginUrl}</p>
-            </CardContent>
-        </Card>
-
-        <Card>
+        
+        <Card className="qr-card">
             <CardHeader>
                 <CardTitle>QR Codes de Zona</CardTitle>
                 <CardDescription>Imprima e coloque estes na sua área de jogo.</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {zones.map(zone => (
-                    <div key={zone.id} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card">
+                    <div key={zone.id} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card qr-card">
                         <h3 className="font-bold text-xl">Zona {zone.id.split('-')[1].toUpperCase()}</h3>
                         <div className="bg-white p-2 rounded-md">
                             <QRCodeSVG value={zone.url} size={128} />
