@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ['"Fredoka One"', 'sans-serif'],
+        headline: ['"Fredoka One"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -88,10 +88,16 @@ export default {
             height: '0',
           },
         },
+        'bounce-in': {
+          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '80%': { transform: 'scale(1.02)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'bounce-in': 'bounce-in 0.3s ease-out forwards',
       },
     },
   },

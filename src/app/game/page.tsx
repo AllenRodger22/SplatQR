@@ -1,0 +1,89 @@
+'use client';
+
+import { useContext, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { GameContext } from '@/context/GameContext';
+import ClientOnly from '@/components/client-only';
+import { Loader2, Settings } from 'lucide-react';
+import { ProgressBar } from '@/components/game/ProgressBar';
+import { Timer } from '@/components/game/Timer';
+import { TeamPanel } from '@/components/game/TeamPanel';
+import { ZoneGrid } from '@/components/game/ZoneGrid';
+import { GameOverScreen } from '@/components/game/GameOverScreen';
+
+export default function GamePage() {
+  const router = useRouter();
+  const context = useContext(GameContext);
+  const { game, player } = context || {};
+
+  useEffect(() => {
+    if (!context?.loading && !player) router.push('/');
+    if (!context?.loading && game?.status === 'setup') router.push('/setup');
+  }, [context, player, game, router]);
+
+  const scores = useMemo(() => {
+    if (!game) return { splatSquad: 0, inkMasters: 0 };
+    const splatSquadScore = game.zones.filter(z => z.capturedBy === 'splatSquad').length;
+    const inkMastersScore = game.zones.filter(z => z.capturedBy === 'inkMasters').length;
+    const totalZones = game.zones.length;
+
+    return {
+      splatSquad: totalZones > 0 ? (splatSquadScore / totalZones) * 100 : 0,
+      inkMasters: totalZones > 0 ? (inkMastersScore / totalZones) * 100 : 0,
+    };
+  }, [game]);
+  
+  if (!game || !player) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4">Loading game...</p>
+      </div>
+    );
+  }
+
+  return (
+    <ClientOnly>
+      {game.status === 'finished' && <GameOverScreen />}
+      <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
+        <header className="relative text-center mb-4 animate-bounce-in">
+          <Timer />
+          <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+            SplatTag
+          </h1>
+        </header>
+
+        <main className="flex-grow flex flex-col gap-6">
+          <section className="animate-bounce-in" style={{ animationDelay: '100ms' }}>
+            <ProgressBar
+              splatSquadPercent={scores.splatSquad}
+              inkMastersPercent={scores.inkMasters}
+              splatSquadColor={game.teams.splatSquad.color}
+              inkMastersColor={game.teams.inkMasters.color}
+            />
+          </section>
+
+          <section className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6 flex-grow">
+            <div className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
+              <TeamPanel teamId="splatSquad" score={scores.splatSquad} />
+            </div>
+            <div className="animate-bounce-in" style={{ animationDelay: '400ms' }}>
+                <ZoneGrid />
+            </div>
+            <div className="animate-bounce-in" style={{ animationDelay: '300ms' }}>
+              <TeamPanel teamId="inkMasters" score={scores.inkMasters} />
+            </div>
+          </section>
+        </main>
+        
+        <footer className="text-center mt-8">
+            <Link href="/qr-codes" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
+                <Settings className="h-4 w-4" />
+                Admin / QR Codes
+            </Link>
+        </footer>
+      </div>
+    </ClientOnly>
+  );
+}
