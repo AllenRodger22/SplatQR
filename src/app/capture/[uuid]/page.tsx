@@ -77,16 +77,16 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
           <>
             <div className="relative flex items-center justify-center">
               <svg className="w-48 h-48 transform -rotate-90">
-                <circle className="text-secondary" strokeWidth="10" stroke="currentColor" fill="transparent" r="82" cx="96" cy="96" />
+                <circle className="text-secondary" strokeWidth="20" stroke="currentColor" fill="transparent" r="72" cx="96" cy="96" />
                 <circle
                   className="text-primary"
-                  strokeWidth="10"
-                  strokeDasharray={2 * Math.PI * 82}
-                  strokeDashoffset={2 * Math.PI * 82 * (1 - countdown / 10)}
+                  strokeWidth="20"
+                  strokeDasharray={2 * Math.PI * 72}
+                  strokeDashoffset={2 * Math.PI * 72 * (1 - countdown / 10)}
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="transparent"
-                  r="82"
+                  r="72"
                   cx="96"
                   cy="96"
                 />
