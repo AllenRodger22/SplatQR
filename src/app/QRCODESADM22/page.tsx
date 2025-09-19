@@ -7,7 +7,6 @@ import { QrCode, Printer, Home, LogIn, ClipboardList, TimerReset, ShieldCheck, L
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ZONE_DEFINITIONS, LOGIN_PATH } from '@/lib/zones';
-import { resolveBaseUrl } from '@/lib/urls';
 
 const instructions = [
   'Posicione cada QR code na zona correspondente (A, B, C, ...).',
@@ -22,38 +21,36 @@ const monitoringNotes = [
   'O painel do jogo (/game) reflete imediatamente qualquer mudança de controle de zona.',
 ];
 
+const QR_CODE_BASE_URL = 'https://splat-qr.vercel.app';
+
 export default function QRCodesAdm22Page() {
-  const [baseUrl, setBaseUrl] = useState('');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setBaseUrl(resolveBaseUrl());
+    setIsClient(true);
   }, []);
 
-  const loginUrl = useMemo(() => (baseUrl ? `${baseUrl}${LOGIN_PATH}` : ''), [baseUrl]);
-  const manualLoginUrl = useMemo(() => (baseUrl ? `${baseUrl}/manual-login` : ''), [baseUrl]);
+  const loginUrl = useMemo(() => `${QR_CODE_BASE_URL}${LOGIN_PATH}`, []);
+  const manualLoginUrl = useMemo(() => `${QR_CODE_BASE_URL}/manual-login`, []);
   const zones = useMemo(
     () =>
       ZONE_DEFINITIONS.map((zone) => ({
         ...zone,
-        captureUrl: baseUrl ? `${baseUrl}/capture/${zone.uuid}` : '',
+        captureUrl: `${QR_CODE_BASE_URL}/${zone.uuid}`,
       })),
-    [baseUrl]
+    []
   );
 
   const handlePrint = () => {
     window.print();
   };
 
-  if (!baseUrl) {
+  if (!isClient) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <div className="space-y-1">
           <p className="text-lg font-semibold text-foreground">Preparando QR Codes...</p>
-          <p className="text-sm text-muted-foreground">
-            Caso esta tela persista, defina <code className="rounded bg-muted px-1">NEXT_PUBLIC_SITE_URL</code> na Vercel ou abra
-            esta página diretamente pelo domínio final.
-          </p>
         </div>
       </div>
     );
@@ -92,7 +89,7 @@ export default function QRCodesAdm22Page() {
               <QrCode className="h-10 w-10" /> Painel de QR Codes
             </h1>
             <p className="text-sm text-muted-foreground">
-              Base detectada: <span className="font-semibold text-foreground">{baseUrl}</span>
+              Base dos QR Codes: <span className="font-semibold text-foreground">{QR_CODE_BASE_URL}</span>
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -176,7 +173,7 @@ export default function QRCodesAdm22Page() {
                     </div>
                     <div className="space-y-1 text-xs">
                       <p className="font-mono break-all text-muted-foreground">{zone.captureUrl}</p>
-                      <p className="font-semibold text-muted-foreground/80">ID: {zone.uuid.toUpperCase()}</p>
+                      <p className="font-semibold text-muted-foreground/80">ID: {zone.uuid}</p>
                     </div>
                   </div>
                 ))}
