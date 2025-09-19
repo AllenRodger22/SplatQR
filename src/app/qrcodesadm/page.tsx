@@ -19,7 +19,7 @@ export default function QRCodesAdminPage() {
 
   const zones = Array.from({ length: NUM_ZONES }, (_, i) => {
     const zoneLetter = String.fromCharCode(97 + i);
-    const uuid = '11111111111111111111' + zoneLetter;
+    const uuid = 'a1b2c3d4e5f6g7h8i9j0' + zoneLetter;
     return {
       id: `zone-${zoneLetter}`,
       url: `https://splat-qr.vercel.app/capture/${uuid}`,
