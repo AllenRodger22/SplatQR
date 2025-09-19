@@ -12,7 +12,6 @@ import { PaintSplatter } from 'lucide-react';
 export function LoginForm() {
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('🦑');
-  const [password, setPassword] = useState('');
   const context = useContext(GameContext);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -48,21 +47,9 @@ export function LoginForm() {
             <Label>Choose Your Symbol</Label>
             <EmojiPicker value={emoji} onChange={setEmoji} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Not validated, but required"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-12 text-lg"
-            />
-          </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full h-14 text-xl font-bold transform hover:scale-105 transition-transform" disabled={!name.trim() || !password.trim()}>
+          <Button type="submit" className="w-full h-14 text-xl font-bold transform hover:scale-105 transition-transform" disabled={!name.trim()}>
             Join the Fray!
           </Button>
         </CardFooter>
