@@ -6,7 +6,7 @@ import { GameContext } from '@/context/GameContext';
 import { Loader2, CheckCircle, XCircle, ShieldQuestion } from 'lucide-react';
 import ClientOnly from '@/components/client-only';
 
-type CaptureStatus = 'counting' | 'capturing' | 'success' | 'failure' | 'already_owned' | 'invalid';
+type CaptureStatus = 'counting' | 'capturing' | 'success' | 'failure' | 'invalid';
 
 export default function CapturePage({ params }: { params: { uuid: string } }) {
   const router = useRouter();
@@ -53,13 +53,6 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
         return;
     }
     
-    const playerTeamId = game.teams.splatSquad.players.some(p => p.id === player?.id) ? 'splatSquad' : 'inkMasters';
-    if(zone.capturedBy === playerTeamId){
-        setStatus('already_owned');
-        setTimeout(() => router.push('/game'), 3000);
-        return;
-    }
-
     try {
       await captureZone(zoneId);
       setStatus('success');

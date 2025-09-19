@@ -143,8 +143,9 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (!player || !game || game.status !== 'setup') return;
 
     const { splatSquad, inkMasters } = game.teams;
-    if (splatSquad.players.length < 2 || inkMasters.players.length < 2) {
-      toast({ variant: 'destructive', title: 'Jogadores insuficientes!', description: 'Cada equipe precisa de pelo menos 2 jogadores para começar.' });
+    // Allow starting with at least one player in one team
+    if (splatSquad.players.length < 1 && inkMasters.players.length < 1) {
+      toast({ variant: 'destructive', title: 'Jogadores insuficientes!', description: 'Pelo menos um jogador precisa estar em uma equipe para começar.' });
       return;
     }
     
@@ -197,11 +198,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
     if (!zone) {
       toast({ variant: 'destructive', title: 'Zona Inválida', description: 'Este QR code não corresponde a uma zona válida.' });
       return;
-    }
-    
-    if (zone.capturedBy === playerTeamId) {
-        toast({ title: 'Zona Segura!', description: 'Sua equipe já domina esta zona.' });
-        return;
     }
 
     const updatedZones = game.zones.map(z => 

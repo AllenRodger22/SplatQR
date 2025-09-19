@@ -21,7 +21,8 @@ export default function SetupPage() {
 
   const canStartGame = useMemo(() => {
     if (!game) return false;
-    return game.teams.splatSquad.players.length >= 2 && game.teams.inkMasters.players.length >= 2;
+    // Allow starting with at least one player in one team
+    return game.teams.splatSquad.players.length >= 1 || game.teams.inkMasters.players.length >= 1;
   }, [game]);
 
   const playerHasVoted = useMemo(() => {
@@ -59,8 +60,8 @@ export default function SetupPage() {
             </CardTitle>
             <CardDescription>
               {canStartGame 
-                ? 'O primeiro voto iniciará a partida! Cada equipe precisa de pelo menos 2 jogadores.'
-                : 'Cada equipe precisa de pelo menos 2 jogadores para iniciar o jogo.'
+                ? 'O primeiro voto iniciará a partida! Pelo menos um jogador é necessário.'
+                : 'Pelo menos um jogador precisa entrar em uma equipe para começar.'
               }
             </CardDescription>
           </CardHeader>
