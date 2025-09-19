@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { GameContext } from '@/context/GameContext';
 import type { TeamId } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
 const TEAM_COLORS = [
   '#FF4500', // OrangeRed
@@ -44,13 +44,13 @@ export function ColorPicker({ teamId }: ColorPickerProps) {
             className={cn(
               'relative flex aspect-square items-center justify-center rounded-md border-2 transition-all',
               isSelected ? 'border-foreground scale-110 shadow-lg' : 'border-transparent',
-              isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-105'
+              isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
             )}
             style={{ backgroundColor: color }}
             aria-label={`Selecionar cor ${color}`}
           >
             {isSelected && <Check className="h-6 w-6 text-black/70 stroke-[3]" />}
-            {isDisabled && <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold text-xs">USADA</div>}
+            {isDisabled && <X className="h-8 w-8 text-black" />}
           </button>
         );
       })}
