@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
 import { Loader2 } from 'lucide-react';
@@ -10,21 +10,26 @@ import ClientOnly from '@/components/client-only';
 export default function ManualLoginPage() {
   const router = useRouter();
   const context = useContext(GameContext);
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
   useEffect(() => {
-    if (context?.loading) return;
+    if (context?.loading) {
+      return;
+    }
     
     if (context?.player) {
-       router.push('/setup');
+       router.replace('/setup');
+    } else {
+       setIsRedirecting(false);
     }
   }, [context, router]);
 
   const renderContent = () => {
-    if (context?.loading || context?.player) {
+    if (isRedirecting) {
       return (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p>Redirecionando...</p>
+          <p>Verificando sessão...</p>
         </div>
       );
     }

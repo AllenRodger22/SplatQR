@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
 import ClientOnly from '@/components/client-only';
@@ -14,30 +14,23 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 export default function SetupPage() {
   const router = useRouter();
   const context = useContext(GameContext);
-  const { game, player, voteToStart, toggleReady } = context || {};
+  const { game, player, voteToStart, toggleReady, loading } = context || {};
+
+  useEffect(() => {
+    if (loading) return;
+    if (!player) {
+        router.replace('/manual-login');
+        return;
+    };
+    if (game?.status === 'playing' || game?.status === 'finished') {
+      router.replace('/game');
+    }
+  }, [player, game, router, loading]);
 
   const playerIsInTeam = useMemo(() => {
     if (!game || !player) return false;
     return game.teams.splatSquad.players.some(p => p.id === player.id) || game.teams.inkMasters.players.some(p => p.id === player.id);
   }, [game, player]);
-
-  useEffect(() => {
-    if (context?.loading) return;
-    if (!player) {
-        router.push('/');
-        return;
-    };
-    if (!game) return;
-
-    if (game.status === 'finished') {
-      router.push('/game');
-      return;
-    }
-
-    if (game.status === 'playing' && playerIsInTeam) {
-      router.push('/game');
-    }
-  }, [player, game, router, context, playerIsInTeam]);
 
   const playerHasVoted = useMemo(() => {
     if (!game || !player) return false;
@@ -54,7 +47,7 @@ export default function SetupPage() {
       return game.teams.splatSquad.players.length + game.teams.inkMasters.players.length;
   }, [game]);
 
-  if (!game || !player || context?.loading) {
+  if (loading || !game || !player || game.status !== 'setup') {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -69,21 +62,9 @@ export default function SetupPage() {
         <header className="text-center mb-8">
           <h1 className="text-5xl font-bold tracking-tighter text-primary">Configuração do Jogo</h1>
           <p className="text-xl text-muted-foreground mt-2">
-            {game.status === 'setup'
-              ? 'Monte suas equipes e prepare-se para a batalha!'
-              : 'Uma partida está em andamento. Você pode acompanhar o lobby como espectador.'}
+            Monte suas equipes e prepare-se para a batalha!
           </p>
         </header>
-
-        {game.status === 'playing' && !playerIsInTeam && (
-          <Alert className="mb-8 border-primary/50 bg-primary/10">
-            <Gamepad2 className="h-5 w-5" />
-            <AlertTitle>Partida em andamento</AlertTitle>
-            <AlertDescription>
-              Você está como espectador enquanto a partida atual acontece. Aguarde o término do jogo para entrar em uma equipe ou sinalizar que está pronto.
-            </AlertDescription>
-          </Alert>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <TeamCard teamId="splatSquad" />
@@ -98,9 +79,7 @@ export default function SetupPage() {
                 Duração do Jogo
               </CardTitle>
               <CardDescription>
-                {game.status !== 'setup'
-                  ? 'Votações indisponíveis durante uma partida em andamento.'
-                  : isPlayerReady
+                {isPlayerReady
                   ? "Você já está pronto e não pode mais votar."
                   : "Vote na duração da partida. A mais votada vence!"}
               </CardDescription>
@@ -109,7 +88,7 @@ export default function SetupPage() {
               <Button
                 className="w-full h-16 text-2xl transition-transform hover:scale-105"
                 onClick={() => voteToStart?.(15)}
-                disabled={playerHasVoted || isPlayerReady || game.status !== 'setup'}
+                disabled={playerHasVoted || isPlayerReady}
               >
                 15 Minutos
                 <div className="ml-2 flex items-center text-sm bg-background/50 rounded-full px-2 py-1">
@@ -119,7 +98,7 @@ export default function SetupPage() {
               <Button
                 className="w-full h-16 text-2xl transition-transform hover:scale-105"
                 onClick={() => voteToStart?.(30)}
-                disabled={playerHasVoted || isPlayerReady || game.status !== 'setup'}
+                disabled={playerHasVoted || isPlayerReady}
               >
                 30 Minutos
                  <div className="ml-2 flex items-center text-sm bg-background/50 rounded-full px-2 py-1">
@@ -136,16 +115,14 @@ export default function SetupPage() {
                     Pronto para Jogar?
                 </CardTitle>
                 <CardDescription>
-                    {game.status === 'setup'
-                      ? 'Quando todos os jogadores estiverem prontos, o jogo começará!'
-                      : 'O lobby está bloqueado até o final da partida atual.'}
+                    Quando todos os jogadores estiverem prontos, o jogo começará!
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
                 <Button
                     className={cn("w-full h-16 text-2xl transition-transform hover:scale-105", isPlayerReady && "bg-green-600 hover:bg-green-700")}
                     onClick={() => toggleReady?.()}
-                    disabled={!playerIsInTeam || game.status !== 'setup'}
+                    disabled={!playerIsInTeam}
                 >
                     <CheckCircle className="mr-2 h-8 w-8" />
                     {isPlayerReady ? "Pronto!" : "Estou Pronto"}

@@ -15,18 +15,18 @@ import { GameOverScreen } from '@/components/game/GameOverScreen';
 export default function GamePage() {
   const router = useRouter();
   const context = useContext(GameContext);
-  const { game, player } = context || {};
+  const { game, player, loading } = context || {};
 
   useEffect(() => {
-    if (context?.loading) return;
+    if (loading) return;
     if (!player) {
-      router.push('/');
+      router.replace('/manual-login');
       return;
     }
     if (game?.status === 'setup') {
-      router.push('/setup');
+      router.replace('/setup');
     }
-  }, [context, player, game, router]);
+  }, [loading, player, game, router]);
 
   const scores = useMemo(() => {
     if (!game) return { splatSquad: 0, inkMasters: 0 };
@@ -40,7 +40,7 @@ export default function GamePage() {
     };
   }, [game]);
   
-  if (!game || !player || context?.loading || game.status !== 'playing' && game.status !== 'finished') {
+  if (loading || !game || !player || (game.status !== 'playing' && game.status !== 'finished')) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

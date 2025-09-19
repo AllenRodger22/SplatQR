@@ -21,25 +21,14 @@ export default function RedirectPage() {
       return;
     }
 
-    if (!game) {
+    // Se tem jogador, mas não tem jogo, ou se o jogo está em setup, vai para a tela de setup.
+    if (!game || game.status === 'setup') {
       router.replace('/setup');
       return;
     }
-
-    if (game.status === 'finished') {
-      router.replace('/game');
-      return;
-    }
-
-    if (game.status === 'playing') {
-      const isPlayerInTeam = game.teams.splatSquad.players.some(p => p.id === player.id)
-        || game.teams.inkMasters.players.some(p => p.id === player.id);
-      router.replace(isPlayerInTeam ? '/game' : '/setup');
-      return;
-    }
-
-    // status === 'setup'
-    router.replace('/setup');
+    
+    // Se o jogo já começou ou terminou, vai para a tela do jogo.
+    router.replace('/game');
 
   }, [context, router]);
 
