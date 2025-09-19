@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Fredoka One"', 'sans-serif'],
+        sans: ['"Poppins"', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

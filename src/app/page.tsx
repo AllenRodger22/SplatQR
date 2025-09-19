@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,15 @@ function HomePageContent() {
   const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-  const { logout } = useContext(GameContext)!;
+  const { logout, user, loading } = useContext(GameContext)!;
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!loading && !user) {
+        const redirectTo = searchParams.get('redirectTo');
+        router.replace(redirectTo ? `/login?redirectTo=${redirectTo}` : '/login');
+    }
+  }, [user, loading, router, searchParams]);
 
   const handleCreateGame = () => {
     setIsCreating(true);
@@ -68,6 +76,15 @@ function HomePageContent() {
       setIsJoining(false);
     }
   };
+  
+    if (loading || !user) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <p>Carregando...</p>
+        </div>
+      );
+    }
 
   return (
     <div className="w-full max-w-md space-y-8">
@@ -123,17 +140,6 @@ function HomePageContent() {
 }
 
 export default function HomePage() {
-  const context = useContext(GameContext);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    if (!context?.loading && !context?.user) {
-        const redirectTo = searchParams.get('redirectTo');
-        router.replace(redirectTo ? `/login?redirectTo=${redirectTo}` : '/login');
-    }
-  }, [context, router, searchParams]);
-  
   return (
     <ClientOnly>
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
@@ -143,15 +149,14 @@ export default function HomePage() {
           </h1>
           <p className="text-xl text-muted-foreground mt-2">A guerra de tinta com QR Codes está de volta!</p>
         </header>
-
-        {context?.loading || !context?.user ? (
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p>Carregando...</p>
-          </div>
-        ) : (
-          <HomePageContent />
-        )}
+        <Suspense fallback={
+            <div className="flex flex-col items-center gap-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p>Carregando...</p>
+            </div>
+        }>
+            <HomePageContent />
+        </Suspense>
       </div>
     </ClientOnly>
   );
