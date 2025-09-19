@@ -36,7 +36,7 @@ export default function QRCodesAdm22Page() {
     () =>
       ZONE_DEFINITIONS.map((zone) => ({
         ...zone,
-        captureUrl: `${QR_CODE_BASE_URL}/${zone.uuid}`,
+        captureUrl: `${QR_CODE_BASE_URL}/capture/${zone.uuid}`,
       })),
     []
   );

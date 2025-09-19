@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 import ClientOnly from '@/components/client-only';
+import { ZONE_DEFINITIONS } from '@/lib/zones';
 
 type CaptureStatus = 'counting' | 'capturing' | 'success' | 'failure' | 'invalid';
 
@@ -20,8 +21,12 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
 
   const { player, game, captureZone, loading } = context || {};
 
-  const zoneLetter = params.uuid.slice(-1);
-  const zoneId = `zone-${zoneLetter}`;
+  const zone = useMemo(() => {
+    return ZONE_DEFINITIONS.find((z) => z.uuid === params.uuid);
+  }, [params.uuid]);
+
+  const zoneId = zone?.id;
+  const zoneLabel = zone?.label.split(' ')[1];
 
   const playerTeamId = useMemo(() => {
     if (!player || !game) return null;
@@ -44,9 +49,9 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
   useEffect(() => {
     if (loading) return;
     if (!player) {
-      router.replace('/manual-login');
+      router.replace(`/manual-login?redirectTo=/capture/${params.uuid}`);
     }
-  }, [loading, player, router]);
+  }, [loading, player, router, params.uuid]);
 
   useEffect(() => {
     if (loading || !player || !game) return;
@@ -54,25 +59,25 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
       router.replace('/setup');
     }
   }, [loading, player, game, playerTeamId, router]);
-
+  
   useEffect(() => {
     if (loading || !game) return;
+
+    if (!zone) {
+      setStatus('invalid');
+      const timeout = setTimeout(() => router.push('/game'), 3000);
+      return () => clearTimeout(timeout);
+    }
+    
     if (game.status !== 'playing') {
       setStatus('failure');
       const timeout = setTimeout(() => router.push('/game'), 3000);
       return () => clearTimeout(timeout);
     }
-  }, [loading, game, router]);
+  }, [loading, game, router, zone]);
 
   const handleCapture = useCallback(async () => {
-    if (!captureZone || !game) return;
-
-    const zone = game.zones.find((z) => z.id === zoneId);
-    if (!zone) {
-      setStatus('invalid');
-      setTimeout(() => router.push('/game'), 3000);
-      return;
-    }
+    if (!captureZone || !game || !zoneId) return;
 
     try {
       await captureZone(zoneId);
@@ -85,7 +90,7 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
   }, [captureZone, game, router, zoneId]);
 
   useEffect(() => {
-    if (status !== 'counting' || loading || !game || game.status !== 'playing') {
+    if (status !== 'counting' || loading || !game || game.status !== 'playing' || !zoneId) {
       return;
     }
 
@@ -122,12 +127,11 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
         cancelAnimationFrame(animationFrame);
       }
     };
-  }, [status, loading, game, handleCapture]);
+  }, [status, loading, game, handleCapture, zoneId]);
 
   const renderStatus = () => {
     switch (status) {
       case 'counting': {
-        const zoneLabel = zoneId.split('-')[1]?.toUpperCase();
         const rotation = -90;
         return (
           <>
