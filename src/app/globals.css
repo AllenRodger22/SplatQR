@@ -68,3 +68,9 @@
     font-family: 'Fredoka One', sans-serif;
   }
 }
+
+@layer utilities {
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 bg-clip-text text-transparent;
+  }
+}

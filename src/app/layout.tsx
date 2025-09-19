@@ -5,7 +5,7 @@ import { GameProvider } from '@/context/GameContext';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'SplatTag',
+  title: 'SplatQR',
   description: 'A Capture the Flag game inspired by Splatoon',
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
       </head>
       <body className={cn(
           "antialiased font-sans",
