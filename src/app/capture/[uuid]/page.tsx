@@ -22,7 +22,7 @@ export default function CapturePage({ params }: { params: { uuid: string } }) {
 
   useEffect(() => {
     if (!loading && !player) {
-      router.push('/');
+      router.push('/login');
       return;
     }
 
