@@ -76,7 +76,7 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-3xl">
               <Gamepad2 className="h-8 w-8" />
-              Criar um Novo Jogo
+              Criar Sala
             </CardTitle>
             <CardDescription>Crie uma nova sala e convide seus amigos para a batalha.</CardDescription>
           </CardHeader>
@@ -89,7 +89,7 @@ export default function HomePage() {
 
         <Card className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
           <CardHeader>
-            <CardTitle className="text-3xl">Entrar em uma Sala</CardTitle>
+            <CardTitle className="text-3xl">Entrar na Sala</CardTitle>
             <CardDescription>Já tem um código? Insira abaixo para entrar no jogo.</CardDescription>
           </CardHeader>
           <form onSubmit={handleJoinGame}>
