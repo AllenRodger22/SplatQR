@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { ZONE_DEFINITIONS } from '@/lib/zones';
 
-const GAME_ID = 'splattag-main';
 const createDefaultCaptureStats = (): CaptureStats => ({
   totalCaptures: { splatSquad: 0, inkMasters: 0 },
   recaptures: { splatSquad: 0, inkMasters: 0 },
@@ -56,6 +55,7 @@ interface GameContextType {
   player: Player | null;
   game: Game | null;
   loading: boolean;
+  gameId: string | null;
   login: (name: string, emoji: string) => Player;
   logout: () => void;
   joinTeam: (teamId: TeamId) => Promise<void>;
@@ -64,6 +64,7 @@ interface GameContextType {
   captureZone: (zoneId: string) => Promise<void>;
   resetGame: () => Promise<void>;
   toggleReady: () => Promise<void>;
+  setGameId: (gameId: string | null) => void;
 }
 
 export const GameContext = createContext<GameContextType | null>(null);
@@ -71,14 +72,15 @@ export const GameContext = createContext<GameContextType | null>(null);
 export const GameProvider = ({ children }: { children: ReactNode }) => {
   const [player, setPlayer] = useLocalStorage<Player | null>('splattag-player', null);
   const [game, setGame] = useState<Game | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const gameDocRef = doc(db, 'games', GAME_ID);
-
   const resetGame = useCallback(async () => {
+    if (!gameId) return;
+    const gameDocRef = doc(db, 'games', gameId);
     try {
-      const captureEventsRef = collection(db, 'games', GAME_ID, 'captureEvents');
+      const captureEventsRef = collection(db, 'games', gameId, 'captureEvents');
       const captureEvents = await getDocs(captureEventsRef);
 
       if (!captureEvents.empty) {
@@ -95,19 +97,26 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       console.error('Error resetting game:', error);
       toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível reiniciar o jogo.' });
     }
-  }, [gameDocRef, toast]);
+  }, [gameId, toast]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(gameDocRef, (doc) => {
-      if (doc.exists()) {
-        const rawData = doc.data();
+    if (!gameId) {
+      setGame(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const gameDocRef = doc(db, 'games', gameId);
+
+    const unsubscribe = onSnapshot(gameDocRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        const rawData = docSnap.data();
         const gameData = rawData as Game;
-        // Ensure readyPlayers array exists
-        if (!gameData.readyPlayers) {
-          gameData.readyPlayers = [];
-        }
+        if (!gameData.readyPlayers) gameData.readyPlayers = [];
+        
         const captureStats = normalizeCaptureStats(gameData.captureStats);
         gameData.captureStats = captureStats;
+        
         if (!('captureStats' in rawData) || !rawData.captureStats) {
           updateDoc(gameDocRef, { captureStats }).catch((error) =>
             console.error('Error updating capture stats metadata:', error)
@@ -115,17 +124,18 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
         }
         setGame(gameData);
       } else {
-        resetGame();
+        await setDoc(gameDocRef, createDefaultGame());
       }
       setLoading(false);
     }, (error) => {
       console.error('Error fetching game state:', error);
       toast({ variant: 'destructive', title: 'Erro de Conexão', description: 'Não foi possível sincronizar o estado do jogo.' });
+      setGame(null);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [gameDocRef, resetGame, toast]);
+  }, [gameId, toast]);
 
   const login = (name: string, emoji: string) => {
     const newPlayer: Player = { id: uuidv4(), name, emoji };
@@ -139,7 +149,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const joinTeam = async (teamId: TeamId) => {
-    if (!player || !game) return;
+    if (!player || !game || !gameId) return;
+    const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
       toast({
@@ -166,12 +177,10 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
     const batch = writeBatch(db);
   
-    // Add to new team
     batch.update(gameDocRef, {
       [`teams.${teamId}.players`]: arrayUnion(player)
     });
   
-    // Remove from other team if exists
     if (isPlayerInOtherTeam) {
       const otherTeamPlayers = game.teams[otherTeamId].players.filter(p => p.id !== player.id);
       batch.update(gameDocRef, {
@@ -189,7 +198,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const selectColor = async (teamId: TeamId, color: string) => {
-    if (!game || !player) return;
+    if (!game || !player || !gameId) return;
+    const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
       toast({
@@ -219,14 +229,14 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const voteToStart = async (duration: 15 | 30) => {
-    if (!player || !game || game.status !== 'setup') return;
+    if (!player || !game || !gameId || game.status !== 'setup') return;
+    const gameDocRef = doc(db, 'games', gameId);
 
     if (game.readyPlayers.includes(player.id)) {
       toast({ variant: 'destructive', title: "Você já está pronto!", description: "Não é possível votar agora."});
       return;
     }
     
-    // Check if player has already voted
     const hasVoted15 = game.votes[15].includes(player.id);
     const hasVoted30 = game.votes[30].includes(player.id);
     if(hasVoted15 || hasVoted30) {
@@ -249,7 +259,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const toggleReady = async () => {
-    if (!player || !game) return;
+    if (!player || !game || !gameId) return;
+    const gameDocRef = doc(db, 'games', gameId);
 
     if (game.status !== 'setup') {
       toast({
@@ -276,7 +287,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       toast({ title: 'Você está pronto!' });
     }
 
-    // Check if all players are ready to start the game
     const allPlayersInTeams = [...game.teams.splatSquad.players, ...game.teams.inkMasters.players];
     const newReadyPlayers = isReady 
       ? game.readyPlayers.filter(id => id !== player.id) 
@@ -304,7 +314,8 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const captureZone = async (zoneId: string) => {
-    if (!player || !game || game.status !== 'playing') return;
+    if (!player || !game || !gameId || game.status !== 'playing') return;
+    const gameDocRef = doc(db, 'games', gameId);
 
     const playerTeamId = game.teams.splatSquad.players.some(p => p.id === player.id)
       ? 'splatSquad'
@@ -353,7 +364,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!isRepeatCapture) {
-        await addDoc(collection(db, 'games', GAME_ID, 'captureEvents'), {
+        await addDoc(collection(db, 'games', gameId, 'captureEvents'), {
           zoneId,
           teamId: playerTeamId,
           playerId: player.id,
@@ -389,7 +400,7 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <GameContext.Provider value={{ player, game, loading, login, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
+    <GameContext.Provider value={{ player, game, loading, gameId, setGameId, login, logout, joinTeam, selectColor, voteToStart, captureZone, resetGame, toggleReady }}>
       {children}
     </GameContext.Provider>
   );

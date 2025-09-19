@@ -8,11 +8,9 @@ import { Game } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { TimerIcon } from 'lucide-react';
 
-const GAME_ID = 'splattag-main';
-
 export function Timer() {
   const context = useContext(GameContext);
-  const { game } = context || {};
+  const { game, gameId } = context || {};
   const [remainingTime, setRemainingTime] = useState('00:00');
   const [isEnding, setIsEnding] = useState(false);
 
@@ -26,7 +24,8 @@ export function Timer() {
     }
 
     const interval = setInterval(async () => {
-      const startTime = game.gameStartTime!.toDate().getTime();
+      if (!game?.gameStartTime) return;
+      const startTime = game.gameStartTime.toDate().getTime();
       const durationMillis = game.gameDuration * 60 * 1000;
       const endTime = startTime + durationMillis;
       const now = Date.now();
@@ -36,9 +35,8 @@ export function Timer() {
         setRemainingTime('00:00');
         clearInterval(interval);
         
-        // Only one client should update the game status
-        if (game.status === 'playing') {
-            const gameDocRef = doc(db, 'games', GAME_ID);
+        if (game.status === 'playing' && gameId) {
+            const gameDocRef = doc(db, 'games', gameId);
             try {
                 const splatSquadScore = game.zones.filter(z => z.capturedBy === 'splatSquad').length;
                 const inkMastersScore = game.zones.filter(z => z.capturedBy === 'inkMasters').length;
@@ -47,10 +45,8 @@ export function Timer() {
                 else if (inkMastersScore > splatSquadScore) winner = 'inkMasters';
                 else winner = 'draw';
                 
-                // Check status again before writing to prevent race conditions
-                if(game.status === 'playing'){
-                    await updateDoc(gameDocRef, { status: 'finished', winner: winner });
-                }
+                await updateDoc(gameDocRef, { status: 'finished', winner: winner });
+
             } catch (error) {
                 console.error("Error finishing game:", error);
             }
@@ -73,7 +69,7 @@ export function Timer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [game, isEnding]);
+  }, [game, gameId, isEnding]);
 
   if (!game || !game.gameStartTime) {
     const duration = game?.gameDuration || 15;
