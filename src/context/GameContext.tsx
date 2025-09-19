@@ -14,8 +14,8 @@ const NUM_ZONES = 11;
 const defaultGame: Game = {
   status: 'setup',
   teams: {
-    splatSquad: { name: 'Esquadrão Splat', color: '#FF00FF', players: [] },
-    inkMasters: { name: 'Mestres da Tinta', color: '#00FFFF', players: [] },
+    splatSquad: { name: 'Time A', color: '#FF00FF', players: [] },
+    inkMasters: { name: 'Time B', color: '#00FFFF', players: [] },
   },
   zones: Array.from({ length: NUM_ZONES }, (_, i) => ({
     id: `zone-${String.fromCharCode(97 + i)}`,
