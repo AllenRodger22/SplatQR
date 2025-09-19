@@ -13,21 +13,33 @@ export default function RedirectPage() {
       return; // Aguarda o carregamento do contexto
     }
 
-    if (!context?.player) {
+    const player = context?.player;
+    const game = context?.game;
+
+    if (!player) {
       router.replace('/manual-login');
       return;
     }
 
-    if (context?.game) {
-      if (context.game.status === 'playing' || context.game.status === 'finished') {
-        router.replace('/game');
-      } else { // 'setup'
-        router.replace('/setup');
-      }
-    } else {
-        // Se não houver jogo, mas houver jogador, vai para o setup
-        router.replace('/setup');
+    if (!game) {
+      router.replace('/setup');
+      return;
     }
+
+    if (game.status === 'finished') {
+      router.replace('/game');
+      return;
+    }
+
+    if (game.status === 'playing') {
+      const isPlayerInTeam = game.teams.splatSquad.players.some(p => p.id === player.id)
+        || game.teams.inkMasters.players.some(p => p.id === player.id);
+      router.replace(isPlayerInTeam ? '/game' : '/setup');
+      return;
+    }
+
+    // status === 'setup'
+    router.replace('/setup');
 
   }, [context, router]);
 

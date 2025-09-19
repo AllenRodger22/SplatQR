@@ -30,13 +30,14 @@ export function ColorPicker({ teamId }: ColorPickerProps) {
   const otherTeamId = teamId === 'splatSquad' ? 'inkMasters' : 'splatSquad';
   const otherTeamColor = game.teams[otherTeamId].color;
   const isPlayerReady = player ? game.readyPlayers.includes(player.id) : false;
+  const lobbyLocked = game.status !== 'setup';
 
 
   return (
     <div className="grid grid-cols-8 gap-2">
       {TEAM_COLORS.map(color => {
         const isSelected = team.color === color;
-        const isDisabled = otherTeamColor === color || isPlayerReady;
+        const isDisabled = otherTeamColor === color || isPlayerReady || lobbyLocked;
         return (
           <button
             key={color}

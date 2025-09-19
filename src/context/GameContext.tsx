@@ -139,6 +139,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   
   const joinTeam = async (teamId: TeamId) => {
     if (!player || !game) return;
+
+    if (game.status !== 'setup') {
+      toast({
+        variant: 'destructive',
+        title: 'Jogo em andamento',
+        description: 'Não é possível trocar de equipe durante uma partida ativa.'
+      });
+      return;
+    }
   
     const otherTeamId: TeamId = teamId === 'splatSquad' ? 'inkMasters' : 'splatSquad';
     const isPlayerInOtherTeam = game.teams[otherTeamId].players.some(p => p.id === player.id);
@@ -180,6 +189,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   const selectColor = async (teamId: TeamId, color: string) => {
     if (!game || !player) return;
+
+    if (game.status !== 'setup') {
+      toast({
+        variant: 'destructive',
+        title: 'Jogo em andamento',
+        description: 'A cor da equipe só pode ser alterada antes da partida começar.'
+      });
+      return;
+    }
 
     if (game.readyPlayers.includes(player.id)) {
         toast({ variant: 'destructive', title: "Você já está pronto!", description: "Não é possível trocar a cor."});
@@ -231,6 +249,15 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
 
   const toggleReady = async () => {
     if (!player || !game) return;
+
+    if (game.status !== 'setup') {
+      toast({
+        variant: 'destructive',
+        title: 'Jogo em andamento',
+        description: 'O status de pronto só pode ser alterado no lobby.'
+      });
+      return;
+    }
 
     const isReady = game.readyPlayers.includes(player.id);
 
