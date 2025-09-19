@@ -49,12 +49,12 @@ export default function GamePage() {
       <div className="container mx-auto p-4 md:p-6 min-h-screen flex flex-col">
         <header className="relative text-center mb-4 animate-bounce-in">
           <Timer />
-          <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
             SplatTag
           </h1>
         </header>
 
-        <main className="flex-grow flex flex-col gap-6">
+        <main className="flex-grow flex flex-col gap-4">
           <section className="animate-bounce-in" style={{ animationDelay: '100ms' }}>
             <ProgressBar
               splatSquadPercent={scores.splatSquad}
@@ -64,11 +64,14 @@ export default function GamePage() {
             />
           </section>
 
-          <section className="grid grid-cols-1 lg:grid-cols-[1fr_2fr_1fr] gap-6 flex-grow">
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+             <div className="animate-bounce-in md:hidden" style={{ animationDelay: '400ms' }}>
+                <ZoneGrid />
+            </div>
             <div className="animate-bounce-in" style={{ animationDelay: '200ms' }}>
               <TeamPanel teamId="splatSquad" score={scores.splatSquad} />
             </div>
-            <div className="animate-bounce-in" style={{ animationDelay: '400ms' }}>
+             <div className="animate-bounce-in hidden md:block" style={{ animationDelay: '400ms' }}>
                 <ZoneGrid />
             </div>
             <div className="animate-bounce-in" style={{ animationDelay: '300ms' }}>
@@ -77,7 +80,7 @@ export default function GamePage() {
           </section>
         </main>
         
-        <footer className="text-center mt-8">
+        <footer className="text-center mt-6">
             <Link href="/qr-codes" className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center justify-center gap-2">
                 <Settings className="h-4 w-4" />
                 Admin / QR Codes

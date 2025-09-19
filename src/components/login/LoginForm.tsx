@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { EmojiPicker } from './EmojiPicker';
-import { PaintSplatter } from 'lucide-react';
+import { PaintRoller } from 'lucide-react';
 
 export function LoginForm() {
   const [name, setName] = useState('');
@@ -25,7 +25,7 @@ export function LoginForm() {
     <Card className="w-full max-w-md animate-bounce-in border-2 border-primary/50 shadow-lg shadow-primary/20">
       <CardHeader className="text-center">
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary">
-          <PaintSplatter className="h-8 w-8" />
+          <PaintRoller className="h-8 w-8" />
         </div>
         <CardTitle className="text-4xl">SplatTag</CardTitle>
         <CardDescription>Create Your Player Profile</CardDescription>
