@@ -18,8 +18,14 @@ export default function GamePage() {
   const { game, player } = context || {};
 
   useEffect(() => {
-    if (!context?.loading && !player) router.push('/');
-    if (!context?.loading && game?.status === 'setup') router.push('/setup');
+    if (context?.loading) return;
+    if (!player) {
+      router.push('/');
+      return;
+    }
+    if (game?.status === 'setup') {
+      router.push('/setup');
+    }
   }, [context, player, game, router]);
 
   const scores = useMemo(() => {
@@ -34,7 +40,7 @@ export default function GamePage() {
     };
   }, [game]);
   
-  if (!game || !player) {
+  if (!game || !player || context?.loading || game.status !== 'playing' && game.status !== 'finished') {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />

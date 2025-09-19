@@ -16,8 +16,12 @@ export default function SetupPage() {
   const { game, player, voteToStart, toggleReady } = context || {};
 
   useEffect(() => {
-    if (!context?.loading && !player) router.push('/');
-    if (!context?.loading && game && (game.status === 'playing' || game.status === 'finished')) {
+    if (context?.loading) return;
+    if (!player) {
+        router.push('/');
+        return;
+    };
+    if (game && (game.status === 'playing' || game.status === 'finished')) {
       router.push('/game');
     }
   }, [player, game, router, context]);

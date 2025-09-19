@@ -12,27 +12,16 @@ export default function ManualLoginPage() {
   const context = useContext(GameContext);
 
   useEffect(() => {
-    if (context?.player && context.game) {
-      if (context.game.status === 'playing' || context.game.status === 'finished') {
-        router.push('/game');
-      } else if (context.game.status === 'setup') {
-        router.push('/setup');
-      }
+    if (context?.loading) return;
+    
+    if (context?.player) {
+       router.push('/setup');
     }
   }, [context, router]);
 
   const renderContent = () => {
-    if (context?.loading) {
+    if (context?.loading || context?.player) {
       return (
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <p>Carregando Jogo...</p>
-        </div>
-      );
-    }
-
-    if (context?.player) {
-       return (
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p>Redirecionando...</p>
