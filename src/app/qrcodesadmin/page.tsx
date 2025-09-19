@@ -1,40 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Home, Printer, QrCode, LogIn } from 'lucide-react';
 import Link from 'next/link';
-
-const NUM_ZONES = 11;
+import { ZONE_DEFINITIONS, LOGIN_PATH } from '@/lib/zones';
+import { resolveBaseUrl } from '@/lib/urls';
 
 export default function QRCodesAdminPage() {
   const [baseUrl, setBaseUrl] = useState('');
 
   useEffect(() => {
-    // We are now using a fixed base URL
-    setBaseUrl('splat-qr.vercel.app');
+    setBaseUrl(resolveBaseUrl());
   }, []);
 
-  const zones = Array.from({ length: NUM_ZONES }, (_, i) => {
-    const zoneLetter = String.fromCharCode(97 + i);
-    const uuid = '11111111111111111111' + zoneLetter;
-    return {
-      id: `zone-${zoneLetter}`,
-      url: `https://splat-qr.vercel.app/capture/${uuid}`,
-      uuid: uuid
-    };
-  });
+  const loginUrl = useMemo(() => (baseUrl ? `${baseUrl}${LOGIN_PATH}` : ''), [baseUrl]);
+  const zones = useMemo(
+    () =>
+      ZONE_DEFINITIONS.map((zone) => ({
+        ...zone,
+        url: baseUrl ? `${baseUrl}/capture/${zone.uuid}` : '',
+      })),
+    [baseUrl]
+  );
 
-  const loginUrl = `https://${baseUrl}/login`;
-  
   const handlePrint = () => {
     window.print();
   };
 
   if (!baseUrl) {
-    return null; // Don't render on server
+    return null; // Don't render on server until we know the base URL
   }
 
   return (
@@ -92,7 +89,7 @@ export default function QRCodesAdminPage() {
                 <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {zones.map(zone => (
                         <div key={zone.id} className="flex flex-col items-center text-center gap-2 p-4 border rounded-lg bg-card qr-card">
-                            <h3 className="font-bold text-xl">Zona {zone.id.split('-')[1].toUpperCase()}</h3>
+                            <h3 className="font-bold text-xl">{zone.label}</h3>
                             <div className="bg-white p-2 rounded-md">
                                 <QRCodeSVG value={zone.url} size={128} />
                             </div>
