@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { GameContext } from '@/context/GameContext';
 import { Loader2, PaintRoller } from 'lucide-react';
@@ -29,16 +29,18 @@ export default function LoginPage() {
   const { player, login } = context || {};
 
   useEffect(() => {
-    if (context?.loading) {
+    if (context?.loading || !login) {
       return;
     }
 
     if (player) {
       router.push('/setup');
-    } else if (login) {
-      const { name, emoji } = generateRandomPlayer();
-      login(name, emoji);
+      return;
     }
+
+    const { name, emoji } = generateRandomPlayer();
+    login(name, emoji);
+    router.push('/setup');
   }, [player, login, router, context?.loading]);
 
   return (
